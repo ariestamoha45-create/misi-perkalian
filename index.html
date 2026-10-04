@@ -1,0 +1,3317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Misi Perkalian - V1</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandNavy: '#1e293b',
+            brandCream: '#fffaf1',
+            brandBlue: '#e0f2fe',
+            brandSage: '#dcfce7',
+            brandPeach: '#ffedd5',
+            brandLav: '#f3e8ff',
+            brandYellow: '#fef08a',
+            brandGreen: '#22c55e',
+            brandOrange: '#f97316',
+            brandRed: '#ef4444',
+          },
+          fontFamily: {
+            baloo: ['"Baloo 2"', 'cursive', 'sans-serif'],
+            nunito: ['Nunito', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ... existing styles ... */
+    :root {
+      --ink: #1e293b;
+      --muted: #64748b;
+      --cream: #fffaf1;
+      --navy: #1e293b;
+      --shadow: 0 14px 35px -5px rgba(30, 41, 59, 0.08);
+    }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #f8fafc;
+      color: var(--ink);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-baloo { font-family: 'Baloo 2', cursive; }
+    
+    .card-glow {
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05), 0 4px 12px -2px rgba(0,0,0,0.03);
+    }
+    .btn-bounce {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-bounce:active {
+      transform: scale(0.96) translateY(2px) !important;
+    }
+
+    /* Floating animation for illustrations */
+    @keyframes floatMild {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .animate-float {
+      animation: floatMild 4s ease-in-out infinite;
+    }
+
+    @keyframes pulseSlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .animate-pulse-slow {
+      animation: pulseSlow 3s ease-in-out infinite;
+    }
+
+    /* Flip Card Animation */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Toast animation */
+    @keyframes slideUp {
+      from { transform: translateY(100%) scale(0.9); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .animate-toast { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* ===== MISSION PERKALIAN 2.0 VISUAL REDESIGN ===== */
+    :root{
+      --game-purple:#635BFF;
+      --game-blue:#39A7FF;
+      --game-cyan:#27D7C4;
+      --game-pink:#FF6FAE;
+      --game-yellow:#FFD84D;
+      --game-orange:#FF9A3D;
+      --game-ink:#24304A;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255,216,77,.32) 0 8%, transparent 9%),
+        radial-gradient(circle at 92% 8%, rgba(255,111,174,.22) 0 9%, transparent 10%),
+        linear-gradient(135deg,#eef7ff 0%,#f4efff 48%,#effff9 100%);
+      overflow-x:hidden;
+    }
+    body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:999px;filter:blur(1px)}
+    body::before{width:260px;height:260px;left:-120px;bottom:8%;background:rgba(57,167,255,.12)}
+    body::after{width:300px;height:300px;right:-140px;top:28%;background:rgba(99,91,255,.10)}
+    .game-shadow{box-shadow:0 18px 0 rgba(49,45,116,.07),0 22px 45px rgba(52,60,120,.13)}
+    .game-card{border:3px solid rgba(255,255,255,.88);box-shadow:0 12px 0 rgba(49,45,116,.08),0 20px 40px rgba(52,60,120,.10)}
+    .game-btn{transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;box-shadow:0 7px 0 rgba(36,48,74,.16)}
+    .game-btn:hover{transform:translateY(-3px);filter:saturate(1.08);box-shadow:0 10px 0 rgba(36,48,74,.14),0 14px 28px rgba(36,48,74,.12)}
+    .game-btn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(36,48,74,.16)!important}
+    .level-card{position:relative;overflow:hidden;min-height:156px;border-radius:28px;border:3px solid rgba(255,255,255,.95);box-shadow:0 8px 0 rgba(49,45,116,.10),0 14px 26px rgba(52,60,120,.10);transition:.18s ease}
+    .level-card:hover{transform:translateY(-5px) rotate(-.5deg);box-shadow:0 12px 0 rgba(49,45,116,.09),0 20px 34px rgba(52,60,120,.15)}
+    .level-card::after{content:"";position:absolute;width:85px;height:85px;border-radius:50%;right:-25px;top:-25px;background:rgba(255,255,255,.25)}
+    .level-card.done{background:linear-gradient(145deg,#35d7a4,#20b982);color:#fff}
+    .level-card.progress{background:linear-gradient(145deg,#ffd95a,#ffb62e);color:#5a3b00}
+    .level-card.locked{background:linear-gradient(145deg,#eef2ff,#e4e8ff);color:#68708a}
+    .level-number{font-family:'Baloo 2',cursive;font-size:2.8rem;font-weight:900;line-height:.9}
+    .world-road{height:7px;border-radius:99px;background:repeating-linear-gradient(90deg,#cfd5ff 0 20px,#fff 20px 32px);opacity:.85}
+    .xp-bar{height:13px;background:#e8eaf5;border-radius:99px;overflow:hidden;border:2px solid #fff;box-shadow:inset 0 2px 5px rgba(36,48,74,.08)}
+    .xp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#ffcc3d,#ff7f50,#ff5fa5);animation:xpGrow 1.1s ease both}
+    @keyframes xpGrow{from{width:0}to{width:var(--xp,50%)}}
+    .sparkle{animation:sparkle 2.2s ease-in-out infinite}
+    @keyframes sparkle{0%,100%{transform:scale(1) rotate(0);opacity:.8}50%{transform:scale(1.18) rotate(10deg);opacity:1}}
+    .bob{animation:bob 3.2s ease-in-out infinite}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .wiggle{animation:wiggle 2.8s ease-in-out infinite}
+    @keyframes wiggle{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-5deg)}92%{transform:rotate(5deg)}95%{transform:rotate(-3deg)}}
+    .pop-in{animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both}
+    @keyframes popIn{from{opacity:0;transform:translateY(16px) scale(.94)}to{opacity:1;transform:none}}
+    .float-cloud{animation:cloudFloat 9s ease-in-out infinite}
+    @keyframes cloudFloat{0%,100%{transform:translateX(0)}50%{transform:translateX(25px)}}
+    .student-shell{background:linear-gradient(180deg,#f5f8ff 0%,#f9f7ff 52%,#f2fffb 100%)}
+    .game-sidebar{background:linear-gradient(180deg,#302a72 0%,#4d3fb0 55%,#2e9eb0 100%);box-shadow:10px 0 35px rgba(48,42,114,.13)}
+    .game-nav-active{background:linear-gradient(135deg,#ffd84d,#ff9b42);color:#382b57!important;box-shadow:0 6px 0 rgba(50,40,92,.18)}
+    .game-nav-item{transition:.16s ease}.game-nav-item:hover{background:rgba(255,255,255,.13);transform:translateX(3px)}
+    .mascot-ring{background:linear-gradient(145deg,#fff,#e8f4ff);border:4px solid rgba(255,255,255,.75);box-shadow:0 8px 0 rgba(36,48,74,.12),0 12px 30px rgba(36,48,74,.12)}
+    .hero-game{background:linear-gradient(135deg,#655cff 0%,#4777ef 50%,#28c9bd 100%);box-shadow:0 10px 0 rgba(54,52,145,.14),0 25px 50px rgba(63,68,160,.20)}
+    .hero-game::before{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-65px;top:-100px;background:rgba(255,255,255,.13)}
+    .hero-game::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;left:34%;bottom:-100px;background:rgba(255,216,77,.18)}
+    .game-section{background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border:3px solid rgba(255,255,255,.92);box-shadow:0 9px 0 rgba(49,45,116,.06),0 18px 36px rgba(52,60,120,.08)}
+    .section-title{font-family:'Baloo 2',cursive;font-weight:900;color:var(--game-ink)}
+    .mini-badge{border:2px solid rgba(255,255,255,.85);box-shadow:0 4px 0 rgba(36,48,74,.10)}
+    @media(max-width:767px){
+      .game-sidebar{background:linear-gradient(90deg,#302a72,#5141b5)}
+      .hero-game{border-radius:26px}
+      .level-card{min-height:142px}
+    }
+
+
+
+    /* ===== TEACHER MISSION CONTROL: ROCKET PROGRESS ===== */
+    .mission-control{
+      background:
+        radial-gradient(circle at 8% 10%,rgba(255,216,77,.22) 0 5%,transparent 6%),
+        radial-gradient(circle at 92% 12%,rgba(255,111,174,.18) 0 6%,transparent 7%),
+        linear-gradient(145deg,#f4f1ff 0%,#eef8ff 52%,#effff8 100%);
+    }
+    .mission-hero{
+      position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#302a72 0%,#5141b5 46%,#239eb0 100%);
+      box-shadow:0 12px 0 rgba(48,42,114,.12),0 25px 50px rgba(48,42,114,.18);
+    }
+    .mission-hero:before,.mission-hero:after{
+      content:"";position:absolute;border-radius:999px;pointer-events:none;
+      background:rgba(255,255,255,.10);
+    }
+    .mission-hero:before{width:240px;height:240px;right:-70px;top:-110px}
+    .mission-hero:after{width:150px;height:150px;left:42%;bottom:-100px;background:rgba(255,216,77,.14)}
+    .stat-game{
+      border:3px solid rgba(255,255,255,.92);
+      box-shadow:0 7px 0 rgba(49,45,116,.08),0 14px 28px rgba(52,60,120,.09);
+      transition:.18s ease;
+    }
+    .stat-game:hover{transform:translateY(-3px)}
+    .mission-panel{
+      background:rgba(255,255,255,.90);
+      border:3px solid rgba(255,255,255,.96);
+      box-shadow:0 9px 0 rgba(49,45,116,.06),0 18px 36px rgba(52,60,120,.09);
+      backdrop-filter:blur(10px);
+    }
+    /* Desktop: seluruh 8 checkpoint + status muat di area dashboard */
+    .mission-scroll{overflow-x:visible;padding-bottom:8px}
+    .mission-grid{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:145px repeat(8,minmax(50px,1fr)) 90px;
+      align-items:center;
+    }
+    .mission-head{
+      color:#66708b;font-size:10px;font-weight:900;text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .mission-head-cell{text-align:center;padding:9px 4px}
+    .mission-head-student{text-align:left;padding:9px 12px}
+    .mission-row{
+      position:relative;
+      min-height:76px;
+      border-radius:22px;
+      margin:6px 0;
+      background:linear-gradient(90deg,#fbfcff,#fff);
+      border:2px solid #edf0fa;
+      box-shadow:0 4px 0 rgba(49,45,116,.035);
+      transition:.18s ease;
+    }
+    .mission-row:hover{
+      transform:translateY(-2px);
+      border-color:#d9d6ff;
+      box-shadow:0 7px 18px rgba(52,60,120,.09);
+    }
+    .mission-row:before{
+      content:"";position:absolute;left:calc(145px + 32px);right:90px;top:50%;
+      height:5px;transform:translateY(-50%);border-radius:99px;
+      background:repeating-linear-gradient(90deg,#d8dcf5 0 16px,#eef0fb 16px 26px);
+      z-index:0;
+    }
+    .mission-student{
+      position:relative;z-index:2;display:flex;align-items:center;gap:9px;
+      padding:8px 12px;min-width:0;
+    }
+    .mission-avatar{
+      width:42px;height:42px;border-radius:15px;background:linear-gradient(145deg,#fff,#eef3ff);
+      display:flex;align-items:center;justify-content:center;font-size:23px;
+      border:2px solid #fff;box-shadow:0 4px 0 rgba(49,45,116,.10);flex:none;
+    }
+    .mission-name{font-weight:900;color:#26324c;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mission-sub{font-size:9px;font-weight:900;color:#8a91a8;margin-top:1px}
+    .mission-node{
+      position:relative;z-index:2;display:flex;align-items:center;justify-content:center;
+      height:76px;
+    }
+    .mission-planet{
+      width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-family:'Baloo 2',cursive;font-size:13px;font-weight:900;
+      border:4px solid #fff;box-shadow:0 5px 0 rgba(49,45,116,.10),0 7px 14px rgba(52,60,120,.10);
+      transition:.18s ease;
+    }
+    .mission-planet.done{background:linear-gradient(145deg,#43dfab,#18b983);color:#fff}
+    .mission-planet.progress{background:linear-gradient(145deg,#ffe36a,#ffb52e);color:#684300}
+    .mission-planet.none{background:linear-gradient(145deg,#eef1fa,#dfe4f3);color:#8790a9}
+    .mission-node:hover .mission-planet{transform:scale(1.08)}
+    .mission-rocket{
+      position:absolute;top:-3px;left:50%;transform:translateX(-50%);
+      font-size:27px;z-index:4;filter:drop-shadow(0 4px 2px rgba(48,42,114,.18));
+      animation:rocketHover 1.8s ease-in-out infinite;
+    }
+    @keyframes rocketHover{
+      0%,100%{transform:translate(-50%,0) rotate(-4deg)}
+      50%{transform:translate(-50%,-7px) rotate(4deg)}
+    }
+    .mission-flame{
+      position:absolute;top:25px;left:50%;transform:translateX(-50%);
+      font-size:13px;z-index:3;animation:flameFlicker .28s ease-in-out infinite alternate;
+    }
+    @keyframes flameFlicker{from{transform:translateX(-50%) scale(.8)}to{transform:translateX(-50%) scale(1.15)}}
+    .mission-status{
+      text-align:center;padding:6px 9px;margin-right:10px;border-radius:14px;
+      font-size:9px;font-weight:900;line-height:1.15;
+    }
+    .mission-status.done{background:#dcfce9;color:#08734d}
+    .mission-status.progress{background:#fff2c7;color:#9a6100}
+    .mission-status.start{background:#edf0f8;color:#68718b}
+    .mission-status .big{display:block;font-family:'Baloo 2',cursive;font-size:17px;line-height:1.05}
+    .mission-legend{
+      display:flex;flex-wrap:wrap;gap:8px 14px;font-size:10px;font-weight:900;color:#66708b;
+    }
+    .mission-legend span{display:inline-flex;align-items:center;gap:5px}
+    .legend-dot{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 2px 4px rgba(36,48,74,.12)}
+    .legend-dot.green{background:#25c88e}.legend-dot.yellow{background:#ffc43e}.legend-dot.gray{background:#dfe4f3}
+    .rocket-mini{animation:rocketHover 1.8s ease-in-out infinite;display:inline-block}
+    .mission-complete-badge{
+      display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;
+      background:#dcfce9;color:#08734d;font-size:9px;font-weight:900;
+    }
+    @media(max-width:767px){
+      /* Di HP, tabel boleh digeser horizontal agar node tetap nyaman disentuh. */
+      .mission-scroll{overflow-x:auto}
+      .mission-grid{min-width:980px;grid-template-columns:165px repeat(8,minmax(72px,1fr)) 112px}
+      .mission-row:before{left:calc(165px + 36px);right:112px}
+      .mission-avatar{width:38px;height:38px;font-size:21px}
+      .mission-name{font-size:12px}
+    }
+
+    /* Game treatment for existing practice / result views */
+    #app .bg-white.rounded-3xl{border:2px solid rgba(255,255,255,.9);box-shadow:0 9px 0 rgba(49,45,116,.06),0 18px 34px rgba(52,60,120,.08)}
+    #app button.bg-teal-500{background:linear-gradient(135deg,#23c9b1,#168ed1)!important;box-shadow:0 6px 0 rgba(21,108,139,.20)}
+    #app button.bg-teal-500:hover{filter:saturate(1.12);transform:translateY(-2px)}
+    #app .font-baloo.text-6xl,#app .font-baloo.text-7xl{color:#302a72!important;text-shadow:0 4px 0 rgba(99,91,255,.10)}
+
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col justify-between">
+  <div id="app" class="min-h-screen flex flex-col"></div>
+
+  <!-- Global Modal Container -->
+  <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-200 opacity-0">
+    <div id="modalBox" class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl transform transition-all scale-95 duration-200">
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-40 hidden"></canvas>
+
+  <script>
+    // SVG Illustration Helpers for Kids Theme
+    const SVGIllustrations = {
+      // Cute Owl Mascot
+      mascotOwl: `
+        <svg class="w-full h-full" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="50" fill="#3B82F6"/>
+          <circle cx="60" cy="65" r="42" fill="#60A5FA"/>
+          <!-- Belly -->
+          <ellipse cx="60" cy="75" rx="26" ry="22" fill="#EFF6FF"/>
+          <!-- Feather texture -->
+          <path d="M52 70 Q60 74 68 70" stroke="#93C5FD" stroke-width="3" stroke-linecap="round"/>
+          <path d="M54 78 Q60 82 66 78" stroke="#93C5FD" stroke-width="3" stroke-linecap="round"/>
+          <!-- Eyes background -->
+          <circle cx="44" cy="50" r="15" fill="white"/>
+          <circle cx="76" cy="50" r="15" fill="white"/>
+          <!-- Pupils -->
+          <circle cx="46" cy="50" r="8" fill="#1E293B"/>
+          <circle cx="78" cy="50" r="8" fill="#1E293B"/>
+          <circle cx="48" cy="48" r="3" fill="white"/>
+          <circle cx="80" cy="48" r="3" fill="white"/>
+          <!-- Beak -->
+          <polygon points="60,56 53,65 67,65" fill="#F59E0B"/>
+          <!-- Graduation Cap -->
+          <polygon points="60,12 25,28 60,38 95,28" fill="#1E293B"/>
+          <rect x="52" y="22" width="16" height="8" rx="2" fill="#334155"/>
+          <path d="M90 29 L90 45 L86 48" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="86" cy="49" r="3" fill="#F59E0B"/>
+          <!-- Wings -->
+          <path d="M18 60 Q10 75 24 80 Q28 68 20 60 Z" fill="#2563EB"/>
+          <path d="M102 60 Q110 75 96 80 Q92 68 100 60 Z" fill="#2563EB"/>
+        </svg>
+      `,
+
+      // Rocket Pencil
+      rocketPencil: `
+        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Rocket Flame -->
+          <path d="M50 78 Q45 92 50 98 Q55 92 50 78 Z" fill="#EF4444"/>
+          <path d="M50 80 Q47 90 50 94 Q53 90 50 80 Z" fill="#F59E0B"/>
+          <!-- Pencil Body -->
+          <rect x="40" y="25" width="20" height="48" fill="#FBBF24" rx="2"/>
+          <rect x="40" y="25" width="6" height="48" fill="#F59E0B"/>
+          <!-- Eraser -->
+          <rect x="40" y="15" width="20" height="10" fill="#EC4899" rx="3"/>
+          <rect x="40" y="22" width="20" height="3" fill="#CBD5E1"/>
+          <!-- Pencil Tip -->
+          <polygon points="40,73 60,73 50,88" fill="#FDE68A"/>
+          <polygon points="47,83.5 53,83.5 50,88" fill="#1E293B"/>
+          <!-- Wings -->
+          <path d="M40 50 L24 68 L40 65 Z" fill="#3B82F6"/>
+          <path d="M60 50 L76 68 L60 65 Z" fill="#3B82F6"/>
+          <!-- Window -->
+          <circle cx="50" cy="42" r="6" fill="#67E8F9" stroke="#0284C7" stroke-width="2"/>
+        </svg>
+      `,
+
+      // Star Trophy
+      trophyStar: `
+        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Base -->
+          <rect x="30" y="80" width="40" height="12" rx="4" fill="#1E293B"/>
+          <rect x="38" y="70" width="24" height="10" fill="#334155"/>
+          <!-- Cup Base -->
+          <path d="M35 40 C35 62 65 62 65 40 L70 20 L30 20 Z" fill="#F59E0B"/>
+          <path d="M38 23 L62 23 L58 40 C58 54 42 54 42 40 Z" fill="#FBBF24"/>
+          <!-- Handles -->
+          <path d="M30 25 C18 25 18 42 33 45" stroke="#F59E0B" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M70 25 C82 25 82 42 67 45" stroke="#F59E0B" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <!-- Star emblem -->
+          <polygon points="50,26 53,33 60,33 55,38 57,45 50,40 43,45 45,38 40,33 47,33" fill="#FFF"/>
+        </svg>
+      `,
+
+      // Math Sparkles Floating Box
+      mathBannerBg: `
+        <svg class="w-full h-full opacity-20 absolute inset-0 pointer-events-none" viewBox="0 0 400 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="20" y="40" font-size="28" font-weight="bold" fill="currentColor">×</text>
+          <text x="120" y="120" font-size="36" font-weight="bold" fill="currentColor">+</text>
+          <text x="280" y="50" font-size="32" font-weight="bold" fill="currentColor">=</text>
+          <text x="340" y="130" font-size="24" font-weight="bold" fill="currentColor">÷</text>
+          <circle cx="200" cy="30" r="15" stroke="currentColor" stroke-width="4" fill="none"/>
+          <polygon points="80,130 90,110 100,130" fill="currentColor"/>
+          <rect x="300" y="80" width="18" height="18" rx="4" fill="currentColor"/>
+        </svg>
+      `
+    };
+
+    // ===== SUPABASE CONFIG =====
+    // Isi dua nilai ini dari Project Settings > API di project Supabase Misi Perkalian.
+    const SUPABASE_URL = 'https://jkghdshoqtniosnjiomq.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_UlGaUwiJFr917VK2KfJF0Q_elgrZLrd';
+    const supabaseReady = SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('PASTE_') && !SUPABASE_ANON_KEY.includes('PASTE_');
+    const sb = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    const STORAGE_KEY = 'misi_perkalian_v1_fixed_db';
+
+    // ===== ROSTER KELAS VI =====
+    // FASE 1: seluruh 16 siswa menjadi roster dasar aplikasi.
+    const CLASS_ROSTER = [
+      ['s1','Maysa','maysa','👧'],
+      ['s2','Attaya','attaya','👦'],
+      ['s3','Aji','aji','🧑'],
+      ['s4','Aisah','aisah','👩'],
+      ['s5','Revly','revly','👦'],
+      ['s6','Anisah','anisah','👧'],
+      ['s7','Rafa','rafa','👦'],
+      ['s8','Sahrehan','sahrehan','🧑'],
+      ['s9','Aisyah','aisyah','👧'],
+      ['s10','Arkan','arkan','👦'],
+      ['s11','Aldo','aldo','👦'],
+      ['s12','Mondi','mondi','🧑'],
+      ['s13','Chelsea','chelsea','👧'],
+      ['s14','Noval','noval','👦'],
+      ['s15','Alvido','alvido','👦'],
+      ['s16','Satty','satty','👧']
+    ];
+
+    const emptyProgress = () => ({2:'none',3:'none',4:'none',5:'none',6:'none',7:'none',8:'none',9:'none'});
+
+    const defaultState = {
+      students: CLASS_ROSTER.map(([id,name,username,avatar]) => ({
+        id, name, username, pin:'1234', avatar, progress:emptyProgress(), history:[]
+      })),
+      session: null,
+      soundEnabled: true
+    };
+
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || structuredClone(defaultState);
+
+    // Migrasi roster lama (4 siswa) menjadi 16 siswa tanpa menghapus progres lokal yang sudah ada.
+    function normalizeClassRoster() {
+      const oldByName = Object.fromEntries((state.students || []).map(s => [String(s.name || '').trim().toLowerCase(), s]));
+      state.students = CLASS_ROSTER.map(([id,name,username,avatar]) => {
+        const old = oldByName[name.toLowerCase()];
+        return {
+          ...(old || {}),
+          id: old?.id || id,
+          name, username,
+          pin: old?.pin || '1234',
+          avatar: old?.avatar || avatar,
+          progress: old?.progress || emptyProgress(),
+          history: old?.history || []
+        };
+      });
+      saveState();
+    }
+    normalizeClassRoster();
+    let currentStudent = null;
+    let currentTeacher = null;
+    let currentTable = 4;
+    let quiz = null;
+
+    // Dashboard guru terhubung realtime ke Supabase. Tidak memakai polling/refresh berkala.
+    let teacherRealtimeChannel = null;
+    let teacherRealtimeRefreshBusy = false;
+
+    async function refreshTeacherDashboardRealtime(reason = 'perubahan data') {
+      if (!currentTeacher || teacherRealtimeRefreshBusy) return;
+      teacherRealtimeRefreshBusy = true;
+      try {
+        console.log('[Misi Perkalian] Realtime update:', reason);
+        await renderTeacherHome(true);
+      } catch (err) {
+        console.error('Gagal memperbarui dashboard dari Realtime:', err);
+      } finally {
+        teacherRealtimeRefreshBusy = false;
+      }
+    }
+
+    function startTeacherRealtime() {
+      if (!supabaseReady || !sb || !currentTeacher || teacherRealtimeChannel) return;
+
+      teacherRealtimeChannel = sb
+        .channel('teacher-dashboard-realtime')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'student_progress'
+        }, payload => {
+          refreshTeacherDashboardRealtime(`student_progress ${payload.eventType}`);
+        })
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'submission_results'
+        }, payload => {
+          refreshTeacherDashboardRealtime(`submission_results ${payload.eventType}`);
+        })
+        .subscribe(status => {
+          console.log('[Misi Perkalian] Status realtime guru:', status);
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            setTimeout(() => {
+              if (currentTeacher) {
+                stopTeacherRealtime();
+                startTeacherRealtime();
+              }
+            }, 3000);
+          }
+        });
+    }
+
+    function stopTeacherRealtime() {
+      if (teacherRealtimeChannel && sb) {
+        try { sb.removeChannel(teacherRealtimeChannel); } catch (err) { console.warn('Gagal menutup channel realtime:', err); }
+      }
+      teacherRealtimeChannel = null;
+      teacherRealtimeRefreshBusy = false;
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+      playCorrect() {
+        if (!state.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+      playWrong() {
+        if (!state.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.25);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+      playFanfare() {
+        if (!state.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const now = this.ctx.currentTime + (idx * 0.12);
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        });
+      }
+      playPop() {
+        if (!state.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+    }
+    const sounds = new SoundEngine();
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        info: 'bg-slate-800 text-white border-slate-700',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+      toast.className = `pointer-events-auto px-5 py-3.5 rounded-2xl border shadow-xl font-bold flex items-center gap-3 animate-toast ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    function showModal(html) {
+      const overlay = document.getElementById('modalOverlay');
+      const box = document.getElementById('modalBox');
+      const content = document.getElementById('modalContent');
+      
+      content.innerHTML = html;
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        box.classList.remove('scale-95');
+        box.classList.add('scale-100');
+      }, 10);
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById('modalOverlay');
+      const box = document.getElementById('modalBox');
+      
+      overlay.classList.add('opacity-0');
+      box.classList.remove('scale-100');
+      box.classList.add('scale-95');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 200);
+    }
+
+    // Particle Confetti Generator
+    function launchConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      canvas.classList.remove('hidden');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f43f5e', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2 + 50,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.8) * 18,
+          size: Math.random() * 9 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+
+      let animationId;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+          if (p.opacity > 0) {
+            active = true;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.4; // gravity
+            p.opacity -= 0.012;
+            p.rotation += p.rotSpeed;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.globalAlpha = Math.max(0, p.opacity);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+          }
+        });
+
+        if (active) {
+          animationId = requestAnimationFrame(render);
+        } else {
+          cancelAnimationFrame(animationId);
+          canvas.classList.add('hidden');
+        }
+      }
+      render();
+    }
+
+    function renderHome() {
+      sounds.playPop();
+      document.getElementById('app').innerHTML = `
+        <div class="min-h-screen bg-gradient-to-br from-amber-50 via-teal-50/40 to-indigo-50/60 flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden">
+          
+          <!-- Background Floating Decorative Elements -->
+          <div class="absolute top-10 left-10 w-16 h-16 opacity-30 animate-float hidden sm:block">
+            ${SVGIllustrations.rocketPencil}
+          </div>
+          <div class="absolute bottom-12 right-12 w-20 h-20 opacity-30 animate-float hidden sm:block" style="animation-delay: 2s;">
+            ${SVGIllustrations.trophyStar}
+          </div>
+
+          <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+            
+            <!-- Hero Left -->
+            <div class="lg:col-span-7 bg-white/90 backdrop-blur-md rounded-3xl p-8 sm:p-12 border border-slate-100 shadow-xl relative overflow-hidden">
+              ${SVGIllustrations.mathBannerBg}
+              
+              <div class="relative z-10">
+                <div class="flex items-center gap-4 mb-4">
+                  <!-- Animated Owl Mascot -->
+                  <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 animate-float">
+                    ${SVGIllustrations.mascotOwl}
+                  </div>
+                  <div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black tracking-wider uppercase mb-2">
+                      ✨ Petualangan Belajar Matematika
+                    </div>
+                    <h1 class="font-baloo font-extrabold text-4xl sm:text-5xl text-slate-900 leading-none tracking-tight">
+                      Misi <span class="text-orange-500">Perkalian</span>
+                    </h1>
+                  </div>
+                </div>
+                
+                <p class="text-slate-600 text-base sm:text-lg font-semibold mb-6 leading-relaxed">
+                  Kuasai tabel perkalian 2 sampai 9 bersama teman-teman! Latihan mandiri dengan game interaktif, lalu ikuti setoran resmi bersama Guru di kelas.
+                </p>
+
+                <div class="flex items-center justify-around gap-2 text-2xl sm:text-3xl font-baloo font-bold text-slate-400 py-3.5 bg-amber-50/60 rounded-2xl border border-amber-200/50 mb-6">
+                  <span class="text-teal-600 flex items-center gap-1">×2 <span class="text-xs bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full">Mudah</span></span>
+                  <span>•</span>
+                  <span class="text-amber-500 flex items-center gap-1">×5 <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Seru</span></span>
+                  <span>•</span>
+                  <span class="text-rose-500 flex items-center gap-1">×9 <span class="text-xs bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">Juara</span></span>
+                </div>
+
+                <div class="flex items-center gap-3 text-xs text-slate-500 font-bold">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Sistem Nilai Otomatis & Pantauan Guru
+                </div>
+              </div>
+            </div>
+
+            <!-- Role Selector Right -->
+            <div class="lg:col-span-5 bg-white/90 backdrop-blur-md rounded-3xl p-8 border border-slate-100 shadow-xl">
+              <h2 class="font-baloo text-3xl font-bold text-slate-800 mb-2">Pilih Cara Masuk</h2>
+              <p class="text-slate-500 text-sm font-semibold mb-6">Masuk sesuai peranmu di kelas.</p>
+
+              <div class="space-y-4">
+                <button onclick="renderStudentLogin()" class="btn-bounce w-full p-5 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 border-2 border-teal-100 hover:border-teal-300 flex items-center gap-4 text-left group">
+                  <div class="w-14 h-14 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
+                    🎒
+                  </div>
+                  <div>
+                    <strong class="block text-slate-800 text-lg font-extrabold">Masuk sebagai Siswa</strong>
+                    <span class="text-slate-500 text-xs font-semibold">Latihan game & ikuti setoran perkalian</span>
+                  </div>
+                </button>
+
+                <button onclick="renderTeacherLogin()" class="btn-bounce w-full p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-indigo-50 border-2 border-slate-100 hover:border-indigo-200 flex items-center gap-4 text-left group">
+                  <div class="w-14 h-14 rounded-2xl bg-slate-800 text-white flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
+                    📊
+                  </div>
+                  <div>
+                    <strong class="block text-slate-800 text-lg font-extrabold">Masuk sebagai Guru</strong>
+                    <span class="text-slate-500 text-xs font-semibold">Kelola sesi setoran & lihat rekap siswa</span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400">
+                <span>Versi 1.0 • Edisi Kelas VI</span>
+                <button onclick="toggleSound()" class="hover:text-slate-600 flex items-center gap-1.5">
+                  <span>${state.soundEnabled ? '🔊 Suara: Aktif' : '🔇 Suara: Mute'}</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      saveState();
+      showToast(state.soundEnabled ? 'Suara diaktifkan 🔊' : 'Suara dimatikan 🔇', 'info');
+      if (currentStudent) renderStudentHome();
+      else renderHome();
+    }
+
+    function renderStudentLogin() {
+      sounds.playPop();
+      document.getElementById('app').innerHTML = `
+        <div class="min-h-screen bg-gradient-to-br from-amber-50 to-teal-50 flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-100 shadow-2xl relative overflow-hidden">
+            
+            <div class="w-16 h-16 absolute top-4 right-4 opacity-20">
+              ${SVGIllustrations.rocketPencil}
+            </div>
+
+            <button onclick="renderHome()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold mb-6 flex items-center justify-center transition-colors">
+              ←
+            </button>
+
+            <h1 class="font-baloo text-3xl font-extrabold text-slate-900 mb-1">Masuk Siswa 🎒</h1>
+            <p class="text-slate-500 text-sm font-semibold mb-6">Pilih namamu dan masukkan PIN kelas.</p>
+
+            <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">USERNAME</label>
+                <input id="loginStudentUsername" type="text" autocomplete="username" placeholder="Contoh: maysa" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50" required>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">PASSWORD</label>
+                <input id="loginStudentPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50" required>
+              </div>
+
+              <button type="submit" class="btn-bounce w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-lg shadow-lg shadow-emerald-500/30 transition-all mt-2">
+                Masuk ke Kelas →
+              </button>
+            </form>
+
+            <div class="mt-6 p-4 rounded-2xl bg-amber-50 border border-amber-200/60 text-xs text-amber-800 font-semibold text-center">
+              🔐 Masuk menggunakan username dan password. Email tidak perlu diketahui siswa.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleStudentLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginStudentUsername').value.trim().toLowerCase();
+      const password = document.getElementById('loginStudentPassword').value;
+
+      if (!supabaseReady) {
+        sounds.playWrong();
+        showToast('Supabase belum disambungkan. Isi URL dan Anon Key terlebih dahulu.', 'error');
+        return;
+      }
+
+      try {
+        const internalEmail = `${username}@misiperkalian.local`;
+        const { data: authData, error: authError } = await sb.auth.signInWithPassword({
+          email: internalEmail,
+          password
+        });
+        if (authError) throw authError;
+
+        const { data: student, error: studentError } = await sb
+          .from('students')
+          .select('*')
+          .eq('auth_user_id', authData.user.id)
+          .maybeSingle();
+        if (studentError) throw studentError;
+        if (!student) throw new Error('Akun berhasil login, tetapi data siswa belum terhubung.');
+
+        const { data: progressRows, error: progressError } = await sb
+          .from('student_progress')
+          .select('multiplication_table,status')
+          .eq('student_id', student.id);
+        if (progressError) throw progressError;
+
+        const progress = {2:'none',3:'none',4:'none',5:'none',6:'none',7:'none',8:'none',9:'none'};
+        (progressRows || []).forEach(row => { progress[row.multiplication_table] = row.status; });
+
+        currentStudent = {
+          ...student,
+          progress,
+          history: []
+        };
+
+        // Riwayat resmi selalu dimuat dari Supabase agar tidak hilang saat
+        // siswa refresh, logout-login, atau pindah perangkat.
+        try {
+          currentStudent.history = await loadStudentSubmissionHistory(student.id);
+        } catch (historyErr) {
+          console.warn('Riwayat setoran resmi belum dapat dimuat:', historyErr);
+          currentStudent.history = [];
+        }
+
+        try {
+          const identityKey = 'misi_perkalian_student_identity_v1';
+          const identityMap = JSON.parse(localStorage.getItem(identityKey) || '{}');
+          identityMap[String(student.id)] = {
+            id: student.id,
+            name: student.name,
+            username: student.username || username,
+            avatar: student.avatar || '👧',
+            auth_user_id: authData.user.id
+          };
+          localStorage.setItem(identityKey, JSON.stringify(identityMap));
+        } catch (cacheErr) {
+          console.warn('Gagal menyimpan identitas siswa lokal:', cacheErr);
+        }
+
+        showToast(`Selamat datang, ${student.name}! 👋`, 'success');
+        renderStudentHome();
+      } catch (err) {
+        console.error(err);
+        sounds.playWrong();
+        showToast('Username atau password belum tepat.', 'error');
+      }
+    }
+
+    function renderTeacherLogin() {
+      sounds.playPop();
+      document.getElementById('app').innerHTML = `
+        <div class="min-h-screen bg-gradient-to-br from-slate-100 to-indigo-100 flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-100 shadow-2xl">
+            <button onclick="renderHome()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold mb-6 flex items-center justify-center transition-colors">
+              ←
+            </button>
+
+            <h1 class="font-baloo text-3xl font-extrabold text-slate-900 mb-1">Masuk Guru 📊</h1>
+            <p class="text-slate-500 text-sm font-semibold mb-6">Masuk menggunakan akun Guru yang sudah dibuat di Supabase.</p>
+
+            <form onsubmit="handleTeacherLogin(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">EMAIL GURU</label>
+                <input id="teacherEmail" type="email" autocomplete="username" placeholder="contoh: guru@sekolah.id" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50" required>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">PASSWORD</label>
+                <input id="teacherPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50" required>
+              </div>
+
+              <button type="submit" class="btn-bounce w-full py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-lg shadow-lg shadow-slate-900/20 transition-all mt-2">
+                Buka Panel Guru →
+              </button>
+            </form>
+
+            <div class="mt-6 p-4 rounded-2xl bg-indigo-50 border border-indigo-200/60 text-xs text-indigo-800 font-semibold text-center">
+              🔐 Akun harus terdaftar di <strong>Authentication → Users</strong> dan UID-nya juga ada di tabel <strong>teachers</strong>.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleTeacherLogin(e) {
+      e.preventDefault();
+
+      if (!supabaseReady || !sb) {
+        sounds.playWrong();
+        showToast('Supabase belum siap.', 'error');
+        return;
+      }
+
+      const email = document.getElementById('teacherEmail').value.trim();
+      const password = document.getElementById('teacherPassword').value;
+
+      try {
+        const { data: authData, error: authError } = await sb.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (authError) throw authError;
+
+        const { data: teacher, error: teacherError } = await sb
+          .from('teachers')
+          .select('id,name')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        if (teacherError) throw teacherError;
+
+        if (!teacher) {
+          await sb.auth.signOut();
+          throw new Error('Akun berhasil login, tetapi belum terdaftar di tabel teachers.');
+        }
+
+        currentTeacher = teacher;
+        showToast(`Selamat datang, ${teacher.name || 'Guru'}!`, 'success');
+        await renderTeacherHome();
+        startTeacherRealtime();
+      } catch (err) {
+        console.error('TEACHER LOGIN ERROR:', err);
+        sounds.playWrong();
+
+        const msg = String(err?.message || '').toLowerCase();
+        if (msg.includes('invalid login credentials')) {
+          showToast('Email atau password Guru salah.', 'error');
+        } else if (msg.includes('teachers')) {
+          showToast('Akun belum terhubung ke tabel teachers.', 'error');
+        } else {
+          showToast('Login Guru gagal. Periksa koneksi dan akun Supabase.', 'error');
+        }
+      }
+    }
+
+    async function ensureTeacherAuth() {
+      if (!supabaseReady || !sb) return false;
+
+      const { data: sessionData, error: sessionError } = await sb.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const user = sessionData?.session?.user;
+      if (!user) {
+        currentTeacher = null;
+        renderTeacherLogin();
+        return false;
+      }
+
+      const { data: teacher, error: teacherError } = await sb
+        .from('teachers')
+        .select('id,name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (teacherError) throw teacherError;
+
+      if (!teacher) {
+        // Jangan signOut otomatis di sini. Fungsi ini juga dipakai saat
+        // halaman direfresh; session Supabase yang masih valid harus tetap
+        // dipertahankan agar guru tidak dianggap logout.
+        currentTeacher = null;
+        return false;
+      }
+
+      currentTeacher = teacher;
+      return true;
+    }
+
+    async function handleTeacherLogout() {
+      try {
+        if (supabaseReady && sb) {
+          await sb.auth.signOut();
+        }
+      } catch (err) {
+        console.error('LOGOUT ERROR:', err);
+      } finally {
+        stopTeacherRealtime();
+        currentTeacher = null;
+        currentStudent = null;
+        state.session = null;
+        renderHome();
+      }
+    }
+
+    function studentLayout(contentHtml, activeTab = 'home') {
+      const navItem = (tab, icon, label, fn) => `
+        <button onclick="${fn}" class="game-nav-item w-full px-4 py-3 rounded-2xl font-extrabold text-sm text-left flex items-center gap-3 ${activeTab === tab ? 'game-nav-active' : 'text-white/85'}">
+          <span class="text-xl">${icon}</span><span>${label}</span>
+        </button>`;
+      return `
+        <div class="student-shell min-h-screen flex flex-col md:flex-row">
+          <div class="md:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between text-white" style="background:linear-gradient(90deg,#302a72,#5141b5)">
+            <div class="font-baloo font-black text-xl flex items-center gap-2"><span class="text-2xl">🚀</span>Misi Perkalian</div>
+            <button onclick="toggleMobileNav()" class="game-btn px-4 py-2 rounded-xl bg-white/15 border border-white/20 text-sm font-black">☰ Menu</button>
+          </div>
+          <aside id="sidebarNav" class="hidden md:flex flex-col w-full md:w-64 game-sidebar text-white p-5 sticky top-0 h-auto md:h-screen z-30 shrink-0">
+            <div class="flex items-center gap-3 mb-7 px-2">
+              <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center text-2xl bob">🚀</div>
+              <div><div class="font-baloo font-black text-2xl leading-none">Misi</div><div class="font-baloo font-black text-2xl leading-none text-yellow-300">Perkalian</div></div>
+            </div>
+            <div class="bg-white/10 rounded-3xl p-3 mb-6 border border-white/15 flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-md">${currentStudent.avatar || '👧'}</div>
+              <div class="min-w-0"><div class="font-black text-white truncate">${esc(currentStudent.name)}</div><div class="text-xs text-yellow-200 font-bold">Petualang Aktif</div></div>
+            </div>
+            <nav class="space-y-2 flex-1">
+              ${navItem('home','🗺️','Peta Petualangan','renderStudentHome()')}
+              ${navItem('practice','🎮','Arena Latihan','renderStudentPractice()')}
+              ${navItem('submit','🏆','Setoran Resmi','renderStudentSubmit()')}
+              ${navItem('history','📜','Riwayat Misi','renderStudentHistory()')}
+            </nav>
+            <div class="pt-5 border-t border-white/15 space-y-2">
+              <button onclick="toggleSound()" class="w-full px-4 py-2.5 rounded-xl font-bold text-xs text-white/75 hover:bg-white/10 flex items-center justify-between"><span>Suara</span><span>${state.soundEnabled ? '🔊 ON' : '🔇 OFF'}</span></button>
+              <button onclick="renderHome()" class="w-full px-4 py-3 rounded-2xl font-extrabold text-sm text-white/70 hover:bg-rose-400/20 hover:text-white text-left flex items-center gap-3"><span>↪</span> Keluar</button>
+            </div>
+          </aside>
+          <main class="flex-1 p-4 sm:p-7 lg:p-9 max-w-7xl w-full mx-auto relative overflow-hidden">
+            <div class="absolute -top-8 right-5 text-4xl opacity-50 float-cloud pointer-events-none">☁️</div>
+            <div class="absolute top-36 right-12 text-xl opacity-70 sparkle pointer-events-none">✦</div>
+            <div class="absolute bottom-12 left-4 text-2xl opacity-40 wiggle pointer-events-none">⭐</div>
+            ${contentHtml}
+          </main>
+        </div>
+      `;
+    }
+
+    function toggleMobileNav() {
+      const nav = document.getElementById('sidebarNav');
+      nav.classList.toggle('hidden');
+    }
+
+    async function renderStudentHome() {
+      sounds.playPop();
+
+      // Dashboard siswa selalu mengecek apakah ada sesi setoran resmi yang benar-benar aktif.
+      // Jadi setelah Guru menutup sesi, halaman siswa akan menampilkan "Setoran belum tersedia"
+      // saat kembali ke dashboard/halaman setoran.
+      let activeSession = null;
+      try {
+        activeSession = await loadActiveSubmissionSession();
+      } catch (err) {
+        console.warn('Gagal mengecek sesi setoran di dashboard siswa:', err);
+      }
+      const submitAvailable = !!activeSession;
+
+      const progress = currentStudent.progress;
+      const doneCount = Object.values(progress).filter(x => x === 'done').length;
+      const progressPct = Math.round((doneCount / 8) * 100);
+      const colors = {
+        2:['#5ee7c5','#1e9b78','🌱'],3:['#68c7ff','#3578d4','🌈'],4:['#ffd65a','#d88a16','🚀'],5:['#ff9f67','#e45d2d','🔥'],
+        6:['#a98cff','#6950d4','🌙'],7:['#ff79ad','#d7477d','⭐'],8:['#6ee7d2','#239c92','💎'],9:['#ffd35b','#b87800','👑']
+      };
+      const html = `
+        <div class="space-y-7 pop-in">
+          <section class="hero-game rounded-[30px] p-6 sm:p-8 lg:p-10 text-white relative overflow-hidden">
+            <div class="relative z-10 grid lg:grid-cols-[1fr_auto] gap-7 items-center">
+              <div>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 border border-white/20 text-xs font-black mb-4">🗺️ PETUALANGAN HARI INI</div>
+                <h1 class="font-baloo text-4xl sm:text-5xl lg:text-6xl font-black leading-[.95] mb-3">Halo, ${esc(currentStudent.name)}!</h1>
+                <p class="text-white/85 font-bold max-w-xl">Setiap perkalian yang kamu kuasai membuka jalan ke dunia berikutnya. Yuk lanjutkan misimu!</p>
+                <div class="mt-5 max-w-md">
+                  <div class="flex justify-between text-xs font-black mb-2"><span>PROGRES PETUALANGAN</span><span>${doneCount}/8 dunia</span></div>
+                  <div class="xp-bar"><div class="xp-fill" style="--xp:${Math.max(progressPct,4)}%"></div></div>
+                </div>
+              </div>
+              <div class="relative flex justify-center lg:pr-5">
+                <div class="absolute -top-3 -right-1 text-3xl sparkle">✦</div>
+                <div class="mascot-ring w-36 h-36 sm:w-44 sm:h-44 rounded-[42px] flex items-center justify-center bob">
+                  <div class="w-28 h-28 sm:w-36 sm:h-36">${SVGIllustrations.mascotOwl}</div>
+                </div>
+                <div class="absolute -bottom-3 -left-5 mini-badge bg-yellow-300 text-yellow-900 px-3 py-2 rounded-2xl font-black text-xs rotate-[-5deg]">+ XP TERUS!</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="game-section rounded-[30px] p-5 sm:p-7">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+              <div><div class="text-xs font-black text-indigo-500 tracking-widest">WORLD MAP</div><h2 class="section-title text-3xl sm:text-4xl">Peta Misi Perkalian</h2><p class="text-slate-500 text-sm font-bold">Pilih dunia yang ingin kamu jelajahi.</p></div>
+              <div class="bg-indigo-50 border-2 border-indigo-100 px-4 py-2 rounded-2xl text-sm font-black text-indigo-700">🏆 ${doneCount} Misi Tuntas</div>
+            </div>
+            <div class="world-road mb-5"></div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              ${[2,3,4,5,6,7,8,9].map((n,i)=>{
+                const st=progress[n], c=colors[n];
+                const cls=st==='done'?'done':st==='progress'?'progress':'locked';
+                const label=st==='done'?'MISSION COMPLETE':st==='progress'?'LANJUTKAN MISI':'BELUM DITAKLUKKAN';
+                return `<button onclick="openTablePractice(${n})" class="level-card ${cls} text-left p-4 sm:p-5 game-btn">
+                  <div class="relative z-10 h-full flex flex-col justify-between">
+                    <div class="flex items-start justify-between"><span class="text-3xl">${c[2]}</span><span class="text-xs font-black bg-white/70 px-2 py-1 rounded-xl">×${n}</span></div>
+                    <div><div class="level-number">×${n}</div><div class="font-black text-sm opacity-85">DUNIA ${i+1}</div><div class="mt-2 text-[10px] font-black tracking-wide">${st==='done'?'🏆 ':st==='progress'?'⭐ ':'🔒 '}${label}</div></div>
+                  </div>
+                </button>`;
+              }).join('')}
+            </div>
+          </section>
+
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button onclick="renderStudentPractice()" class="game-card game-btn rounded-[28px] p-5 bg-gradient-to-br from-orange-400 to-pink-500 text-white text-left relative overflow-hidden">
+              <div class="relative z-10"><div class="text-4xl mb-3 bob">🎮</div><div class="font-baloo text-2xl font-black">Arena Latihan</div><div class="text-xs font-bold text-white/80 mt-1">Main cepat, kartu hafalan, dan tantangan angka.</div></div><div class="absolute -right-4 -bottom-8 text-8xl opacity-20">⚡</div>
+            </button>
+            <button onclick="renderStudentSubmit()" class="game-card game-btn rounded-[28px] p-5 ${submitAvailable ? 'bg-gradient-to-br from-cyan-400 to-blue-500' : 'bg-gradient-to-br from-slate-400 to-slate-500'} text-white text-left relative overflow-hidden">
+              <div class="relative z-10">
+                <div class="text-4xl mb-3 bob" style="animation-delay:.4s">🏆</div>
+                <div class="font-baloo text-2xl font-black">Setoran Resmi</div>
+                <div class="text-xs font-bold text-white/80 mt-1">${submitAvailable ? `Sesi Perkalian ${activeSession.multiplication_table} sedang dibuka. Masukkan token dari guru.` : 'Setoran belum tersedia. Tunggu Guru membuka sesi baru.'}</div>
+              </div>
+              <div class="absolute -right-3 -bottom-6 text-8xl opacity-20">${submitAvailable ? '⭐' : '🔒'}</div>
+            </button>
+            <button onclick="renderStudentHistory()" class="game-card game-btn rounded-[28px] p-5 bg-gradient-to-br from-violet-500 to-indigo-600 text-white text-left relative overflow-hidden">
+              <div class="relative z-10"><div class="text-4xl mb-3 bob" style="animation-delay:.8s">📜</div><div class="font-baloo text-2xl font-black">Riwayat Misi</div><div class="text-xs font-bold text-white/80 mt-1">Lihat perjalanan dan skor yang sudah kamu raih.</div></div><div class="absolute -right-3 -bottom-6 text-8xl opacity-20">📈</div>
+            </button>
+          </section>
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'home');
+    }
+
+    function openTablePractice(n) {
+      currentTable = n;
+      renderStudentPractice();
+    }
+
+    function renderStudentPractice() {
+      sounds.playPop();
+      const n = currentTable;
+
+      const html = `
+        <div class="space-y-6">
+          
+          <!-- Practice Header -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <button onclick="renderStudentHome()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+                ←
+              </button>
+              <div>
+                <h1 class="font-baloo text-2xl sm:text-3xl font-extrabold text-slate-900">Area Latihan Perkalian</h1>
+                <p class="text-slate-500 text-xs font-bold">Pilih target angka perkalian dan mode permainan</p>
+              </div>
+            </div>
+
+            <!-- Table Switcher Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto max-w-full pb-2 sm:pb-0">
+              ${[2,3,4,5,6,7,8,9].map(num => `
+                <button onclick="changePracticeTable(${num})" class="px-3.5 py-2 rounded-xl font-extrabold text-sm ${num === n ? 'bg-teal-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                  ×${num}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Practice Modes List -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <button onclick="startQuiz(${n}, 'quick')" class="btn-bounce p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-teal-300 text-left flex items-start gap-4 transition-all group">
+              <div class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                🎯
+              </div>
+              <div>
+                <strong class="block text-slate-800 text-lg font-extrabold mb-1">1. Latihan Cepat (Pilgan)</strong>
+                <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Pilih 1 dari 4 opsi jawaban yang paling tepat. Bagus untuk melatih refleks ingatan.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="startFlashcardMode(${n})" class="btn-bounce p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-amber-300 text-left flex items-start gap-4 transition-all group">
+              <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                🃏
+              </div>
+              <div>
+                <strong class="block text-slate-800 text-lg font-extrabold mb-1">2. Kartu Pasangan (Flashcard)</strong>
+                <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Dibalik kartunya untuk melihat jawaban. Sangat efektif untuk menghafal fakta perkalian.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="startQuiz(${n}, 'fill')" class="btn-bounce p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-300 text-left flex items-start gap-4 transition-all group">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                🧩
+              </div>
+              <div>
+                <strong class="block text-slate-800 text-lg font-extrabold mb-1">3. Isian Keypad Langsung</strong>
+                <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Tuliskan hasil perkalian menggunakan keypad di layar tanpa bantuan pilihan opsi.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="startQuiz(${n}, 'tf')" class="btn-bounce p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-300 text-left flex items-start gap-4 transition-all group">
+              <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                ✓✕
+              </div>
+              <div>
+                <strong class="block text-slate-800 text-lg font-extrabold mb-1">4. Benar atau Salah</strong>
+                <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Evaluasi pernyataan perkalian apakah bernilai Benar atau Salah secara cepat.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="startMatchingGame(${n})" class="btn-bounce p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-violet-300 text-left flex items-start gap-4 transition-all group">
+              <div class="w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                🧩
+              </div>
+              <div>
+                <strong class="block text-slate-800 text-lg font-extrabold mb-1">5. Cari Pasangan</strong>
+                <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Cari pasangan antara soal perkalian dan hasilnya. Semua pasangan mengikuti tabel ×${n}.
+                </p>
+              </div>
+            </button>
+
+            <button onclick="startQuiz(${n}, 'expression')" class="btn-bounce p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-300 text-left flex items-start gap-4 transition-all group">
+              <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                🔎
+              </div>
+              <div>
+                <strong class="block text-slate-800 text-lg font-extrabold mb-1">6. Tebak Bentuk Perkalian</strong>
+                <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                  Diberi hasil perkalian, pilih bentuk perkalian yang tepat dari tabel ×${n}.
+                </p>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- Table Cheatsheet Reference -->
+          <div class="bg-amber-50/60 rounded-3xl p-6 border border-amber-200/60 relative overflow-hidden">
+            <div class="w-20 h-20 absolute -right-2 -bottom-2 opacity-20">
+              ${SVGIllustrations.rocketPencil}
+            </div>
+            <h3 class="font-baloo text-xl font-bold text-amber-950 mb-3">💡 Rangkuman Perkalian ${n}</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-sm font-extrabold text-amber-900 relative z-10">
+              ${[1,2,3,4,5,6,7,8,9,10].map(i => `
+                <div class="bg-white/80 py-2.5 px-3 rounded-xl border border-amber-200/50">
+                  ${n} × ${i} = <span class="text-teal-600 font-black">${n * i}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'practice');
+    }
+
+    function changePracticeTable(num) {
+      currentTable = num;
+      renderStudentPractice();
+    }
+
+    function generateQuestions(table, count = 10) {
+      const questions = [];
+      for (let i = 0; i < count; i++) {
+        const multiplier = Math.floor(Math.random() * 10) + 1;
+        const correct = table * multiplier;
+        const options = new Set([correct]);
+
+        while (options.size < 4) {
+          const delta = [-table, table, -2 * table, 2 * table, -1, 1, 2, -2][Math.floor(Math.random() * 8)];
+          const val = correct + delta;
+          if (val > 0) options.add(val);
+        }
+
+        // For True/False Mode
+        const isTrueStatement = Math.random() > 0.5;
+        let displayedAnswer = correct;
+        if (!isTrueStatement) {
+          const fakeDelta = [-table, table, 1, -1, 2][Math.floor(Math.random() * 5)];
+          displayedAnswer = Math.max(1, correct + fakeDelta);
+          if (displayedAnswer === correct) displayedAnswer += 2;
+        }
+
+        const expressionMultipliers = new Set([multiplier]);
+        while (expressionMultipliers.size < 4) {
+          expressionMultipliers.add(Math.floor(Math.random() * 10) + 1);
+        }
+
+        questions.push({
+          a: table,
+          b: multiplier,
+          correct,
+          correctMultiplier: multiplier,
+          expressionOptions: [...expressionMultipliers].sort(() => Math.random() - 0.5).map(m => ({ multiplier: m, value: table * m })),
+          options: [...options].sort(() => Math.random() - 0.5),
+          isTrueStatement,
+          displayedAnswer
+        });
+      }
+      return questions;
+    }
+
+    function startQuiz(table, type) {
+      sounds.playPop();
+      quiz = {
+        n: table,
+        type,
+        qs: generateQuestions(table, 10),
+        index: 0,
+        score: 0,
+        locked: false,
+        userAnswerInput: ''
+      };
+      renderActiveQuiz();
+    }
+
+    function renderActiveQuiz() {
+      const q = quiz.qs[quiz.index];
+      const total = quiz.qs.length;
+      const progressPct = ((quiz.index) / total) * 100;
+
+      let modeTitle = 'Latihan Cepat';
+      if (quiz.type === 'fill') modeTitle = 'Isian Keypad';
+      if (quiz.type === 'tf') modeTitle = 'Benar atau Salah';
+      if (quiz.type === 'expression') modeTitle = 'Tebak Bentuk Perkalian';
+
+      let quizContent = '';
+
+      if (quiz.type === 'quick') {
+        quizContent = `
+          <div class="grid grid-cols-2 gap-4 mt-6">
+            ${q.options.map(val => `
+              <button onclick="answerQuiz(${val})" class="btn-bounce p-5 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-950 text-2xl sm:text-3xl font-baloo font-extrabold transition-all">
+                ${val}
+              </button>
+            `).join('')}
+          </div>
+        `;
+      } else if (quiz.type === 'tf') {
+        quizContent = `
+          <div class="my-6 p-6 rounded-2xl bg-amber-50/80 border border-amber-200 text-center">
+            <span class="text-xs text-amber-800 font-bold uppercase tracking-wider block mb-1">Apakah Pernyataan Ini Benar?</span>
+            <div class="font-baloo text-4xl sm:text-5xl font-extrabold text-slate-900">
+              ${q.a} × ${q.b} = ${q.displayedAnswer}
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="answerQuiz(${q.displayedAnswer === q.correct})" class="btn-bounce p-5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-baloo font-extrabold text-2xl shadow-lg shadow-emerald-500/20">
+              ✓ BENAR
+            </button>
+            <button onclick="answerQuiz(${q.displayedAnswer !== q.correct})" class="btn-bounce p-5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-baloo font-extrabold text-2xl shadow-lg shadow-rose-500/20">
+              ✕ SALAH
+            </button>
+          </div>
+        `;
+      } else if (quiz.type === 'expression') {
+        quizContent = `
+          <div class="my-5 p-6 rounded-3xl bg-orange-50 border-2 border-orange-200 text-center">
+            <span class="text-xs text-orange-700 font-black uppercase tracking-wider block mb-2">Hasilnya adalah...</span>
+            <div class="font-baloo text-5xl sm:text-6xl font-black text-slate-900">${q.correct}</div>
+            <p class="text-sm text-orange-800 font-bold mt-2">Pilih bentuk perkalian yang menghasilkan ${q.correct}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mt-5">
+            ${q.expressionOptions.map((opt, idx) => `
+              <button onclick="answerQuiz(${opt.multiplier})" class="btn-bounce p-4 sm:p-5 rounded-2xl bg-white hover:bg-orange-50 border-2 border-orange-200 text-slate-900 text-xl sm:text-2xl font-baloo font-extrabold transition-all">
+                ${quiz.n} × ${opt.multiplier}
+              </button>
+            `).join('')}
+          </div>
+        `;
+      } else if (quiz.type === 'fill') {
+        quizContent = `
+          <div class="my-4">
+            <div class="font-mono text-4xl font-extrabold tracking-widest text-teal-600 bg-slate-50 py-3 rounded-2xl border border-slate-200 min-h-[64px] flex items-center justify-center">
+              ${quiz.userAnswerInput || '<span class="text-slate-300">?</span>'}
+            </div>
+          </div>
+
+          <!-- Onscreen Keypad -->
+          <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto my-4">
+            ${[1,2,3,4,5,6,7,8,9,0].map(k => `
+              <button onclick="appendKeypad('${k}')" class="btn-bounce py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-baloo font-extrabold text-xl">
+                ${k}
+              </button>
+            `).join('')}
+            <button onclick="clearKeypad()" class="btn-bounce py-3 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-sm">
+              Hapus
+            </button>
+          </div>
+
+          <button onclick="submitKeypadAnswer()" class="btn-bounce w-full py-4 rounded-2xl bg-teal-500 hover:bg-teal-600 text-white font-extrabold text-lg shadow-lg shadow-teal-500/20">
+            Kirim Jawaban →
+          </button>
+        `;
+      }
+
+      const html = `
+        <div class="max-w-2xl mx-auto space-y-6">
+          
+          <!-- Quiz Bar -->
+          <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <button onclick="renderStudentPractice()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center shrink-0">
+              ✕
+            </button>
+            <div class="flex-1">
+              <div class="flex justify-between text-xs font-bold text-slate-500 mb-1.5">
+                <span>Soal ${quiz.index + 1} dari ${total}</span>
+                <span>${modeTitle} • Perkalian ${quiz.n}</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500 transition-all duration-300 rounded-full" style="width: ${progressPct}%"></div>
+              </div>
+            </div>
+            <div class="w-12 h-12 shrink-0">
+              ${SVGIllustrations.mascotOwl}
+            </div>
+          </div>
+
+          <!-- Question Card -->
+          <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl text-center relative overflow-hidden">
+            <div class="text-xs font-black text-teal-600 uppercase tracking-wider mb-2">Hitung Hasil Perkalian</div>
+            
+            ${quiz.type !== 'tf' && quiz.type !== 'expression' ? `
+              <div class="font-baloo text-6xl sm:text-7xl font-extrabold text-slate-900 my-4 tracking-tight">
+                ${q.a} × ${q.b} = ?
+              </div>
+            ` : ''}
+
+            ${quizContent}
+
+            <div id="quizFeedback" class="mt-6 min-h-[48px]"></div>
+          </div>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'practice');
+    }
+
+    function appendKeypad(digit) {
+      sounds.playPop();
+      if (quiz.userAnswerInput.length < 4) {
+        quiz.userAnswerInput += digit;
+        renderActiveQuiz();
+      }
+    }
+
+    function clearKeypad() {
+      sounds.playPop();
+      quiz.userAnswerInput = '';
+      renderActiveQuiz();
+    }
+
+    function submitKeypadAnswer() {
+      if (!quiz.userAnswerInput) return;
+      const val = parseInt(quiz.userAnswerInput, 10);
+      answerQuiz(val);
+    }
+
+    function answerQuiz(userAns) {
+      if (quiz.locked) return;
+      quiz.locked = true;
+
+      const q = quiz.qs[quiz.index];
+      let isCorrect = false;
+
+      if (quiz.type === 'tf') {
+        isCorrect = (userAns === true);
+      } else if (quiz.type === 'expression') {
+        isCorrect = (userAns === q.correctMultiplier);
+      } else {
+        isCorrect = (userAns === q.correct);
+      }
+
+      const feedbackEl = document.getElementById('quizFeedback');
+
+      if (isCorrect) {
+        quiz.score++;
+        sounds.playCorrect();
+        feedbackEl.innerHTML = `
+          <div class="p-3.5 rounded-2xl bg-emerald-100 text-emerald-900 font-extrabold text-sm flex items-center justify-center gap-2 animate-bounce">
+            🎉 Hebat! Jawabanmu Tepat!
+          </div>
+        `;
+      } else {
+        sounds.playWrong();
+        feedbackEl.innerHTML = `
+          <div class="p-3.5 rounded-2xl bg-rose-100 text-rose-900 font-extrabold text-sm flex items-center justify-center gap-2">
+            💡 Kurang tepat. Jawaban yang benar: <strong>${quiz.type === 'expression' ? `${quiz.n} × ${q.correctMultiplier}` : q.correct}</strong>
+          </div>
+        `;
+      }
+
+      setTimeout(() => {
+        quiz.index++;
+        quiz.locked = false;
+        quiz.userAnswerInput = '';
+        if (quiz.index >= quiz.qs.length) {
+          finishPracticeQuiz();
+        } else {
+          renderActiveQuiz();
+        }
+      }, 1000);
+    }
+
+    function startMatchingGame(table) {
+      sounds.playPop();
+      const multipliers = [...Array(5)].map(() => Math.floor(Math.random() * 10) + 1);
+      const unique = [...new Set(multipliers)];
+      while (unique.length < 5) {
+        const m = Math.floor(Math.random() * 10) + 1;
+        if (!unique.includes(m)) unique.push(m);
+      }
+
+      quiz = {
+        n: table,
+        type: 'matching',
+        pairs: unique.slice(0, 5).map(m => ({ multiplier: m, result: table * m })),
+        shuffledResults: unique.slice(0, 5).map(m => table * m).sort(() => Math.random() - 0.5),
+        matched: [],
+        selectedQuestion: null,
+        selectedAnswer: null,
+        score: 0,
+        locked: false
+      };
+      renderMatchingGame();
+    }
+
+    function renderMatchingGame() {
+      const total = quiz.pairs.length;
+      const matchedCount = quiz.matched.length;
+      const progressPct = Math.round((matchedCount / total) * 100);
+
+      const html = `
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <button onclick="renderStudentPractice()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center shrink-0">✕</button>
+            <div class="flex-1">
+              <div class="flex justify-between text-xs font-black text-slate-500 mb-2">
+                <span>Cari Pasangan • Perkalian ${quiz.n}</span>
+                <span>${matchedCount}/${total} pasangan</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-violet-500 transition-all duration-300 rounded-full" style="width:${progressPct}%"></div>
+              </div>
+            </div>
+            <div class="text-3xl bob">🧩</div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xl relative overflow-hidden">
+            <div class="text-center mb-6">
+              <div class="text-xs font-black text-violet-600 uppercase tracking-wider">PASANGKAN DENGAN TEPAT</div>
+              <h2 class="font-baloo text-3xl sm:text-4xl font-black text-slate-900 mt-1">Soal ↔ Hasil</h2>
+              <p class="text-slate-500 text-sm font-bold">Klik satu soal, lalu klik hasil yang cocok.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 sm:gap-8">
+              <div class="space-y-3">
+                <div class="text-center text-xs font-black text-slate-400 uppercase tracking-wider">SOAL</div>
+                ${quiz.pairs.map((p, i) => {
+                  const done = quiz.matched.includes(p.result);
+                  const selected = quiz.selectedQuestion === p.multiplier;
+                  return `<button ${done ? 'disabled' : `onclick="selectMatchQuestion(${p.multiplier})"`} class="w-full p-4 sm:p-5 rounded-2xl border-2 font-baloo text-xl sm:text-2xl font-black transition-all ${done ? 'bg-emerald-100 border-emerald-300 text-emerald-700 opacity-80' : selected ? 'bg-violet-100 border-violet-500 text-violet-800 scale-[1.02]' : 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:border-violet-400 hover:-translate-y-1'}">
+                    ${done ? '✓ ' : ''}${quiz.n} × ${p.multiplier}
+                  </button>`;
+                }).join('')}
+              </div>
+
+              <div class="space-y-3">
+                <div class="text-center text-xs font-black text-slate-400 uppercase tracking-wider">HASIL</div>
+                ${quiz.shuffledResults.map(result => {
+                  const done = quiz.matched.includes(result);
+                  const selected = quiz.selectedAnswer === result;
+                  return `<button ${done ? 'disabled' : `onclick="selectMatchAnswer(${result})"`} class="w-full p-4 sm:p-5 rounded-2xl border-2 font-baloo text-xl sm:text-2xl font-black transition-all ${done ? 'bg-emerald-100 border-emerald-300 text-emerald-700 opacity-80' : selected ? 'bg-orange-100 border-orange-500 text-orange-800 scale-[1.02]' : 'bg-amber-50 border-amber-200 text-amber-900 hover:border-orange-400 hover:-translate-y-1'}">
+                    ${done ? '✓ ' : ''}${result}
+                  </button>`;
+                }).join('')}
+              </div>
+            </div>
+
+            <div id="matchingFeedback" class="mt-6 min-h-[52px]"></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'practice');
+    }
+
+    function selectMatchQuestion(multiplier) {
+      if (quiz.locked || quiz.matched.includes(quiz.n * multiplier)) return;
+      sounds.playPop();
+      quiz.selectedQuestion = multiplier;
+      tryMatchPair();
+    }
+
+    function selectMatchAnswer(result) {
+      if (quiz.locked || quiz.matched.includes(result)) return;
+      sounds.playPop();
+      quiz.selectedAnswer = result;
+      tryMatchPair();
+    }
+
+    function tryMatchPair() {
+      if (quiz.selectedQuestion == null || quiz.selectedAnswer == null) {
+        renderMatchingGame();
+        return;
+      }
+
+      quiz.locked = true;
+      const expected = quiz.n * quiz.selectedQuestion;
+      const feedbackEl = document.getElementById('matchingFeedback');
+
+      if (expected === quiz.selectedAnswer) {
+        quiz.score++;
+        quiz.matched.push(expected);
+        sounds.playCorrect();
+        feedbackEl.innerHTML = `<div class="p-3.5 rounded-2xl bg-emerald-100 text-emerald-900 font-extrabold text-sm text-center animate-bounce">🎉 Cocok! ${quiz.n} × ${quiz.selectedQuestion} = ${expected}</div>`;
+      } else {
+        sounds.playWrong();
+        feedbackEl.innerHTML = `<div class="p-3.5 rounded-2xl bg-rose-100 text-rose-900 font-extrabold text-sm text-center">💡 Belum cocok. Coba ingat lagi hasil ${quiz.n} × ${quiz.selectedQuestion}.</div>`;
+      }
+
+      setTimeout(() => {
+        quiz.locked = false;
+        quiz.selectedQuestion = null;
+        quiz.selectedAnswer = null;
+        if (quiz.matched.length >= quiz.pairs.length) {
+          finishMatchingGame();
+        } else {
+          renderMatchingGame();
+        }
+      }, expected === quiz.selectedAnswer ? 700 : 850);
+    }
+
+    async function finishMatchingGame() {
+      const total = quiz.pairs.length;
+      await savePracticeResultToSupabase('matching', quiz.n, quiz.score, total);
+      sounds.playFanfare();
+      launchConfetti();
+      const html = `
+        <div class="max-w-xl mx-auto">
+          <div class="bg-white rounded-[32px] p-8 sm:p-10 border border-slate-100 shadow-xl text-center">
+            <div class="text-6xl mb-3 bob">🏆</div>
+            <div class="text-xs font-black text-violet-600 uppercase tracking-wider">MISI SELESAI</div>
+            <h1 class="font-baloo text-4xl sm:text-5xl font-black text-slate-900 mt-2">Semua Pasangan Cocok!</h1>
+            <p class="text-slate-500 font-bold mt-2">Perkalian ×${quiz.n} berhasil kamu pasangkan.</p>
+            <div class="my-7 p-5 rounded-3xl bg-violet-50 border-2 border-violet-100">
+              <div class="text-sm font-black text-violet-700">SKOR</div>
+              <div class="font-baloo text-6xl font-black text-violet-600">${quiz.score}/${total}</div>
+            </div>
+            <button onclick="renderStudentPractice()" class="game-btn w-full py-4 rounded-2xl bg-violet-500 hover:bg-violet-600 text-white font-black text-lg">Main Lagi</button>
+          </div>
+        </div>`;
+      document.getElementById('app').innerHTML = studentLayout(html, 'practice');
+    }
+
+    function startFlashcardMode(table) {
+      sounds.playPop();
+      quiz = {
+        n: table,
+        qs: generateQuestions(table, 10),
+        index: 0,
+        flipped: false
+      };
+      renderFlashcardView();
+    }
+
+    function renderFlashcardView() {
+      const q = quiz.qs[quiz.index];
+      const total = quiz.qs.length;
+
+      const html = `
+        <div class="max-w-xl mx-auto space-y-6">
+          
+          <div class="flex items-center justify-between">
+            <button onclick="renderStudentPractice()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center">
+              ←
+            </button>
+            <div class="font-baloo text-xl font-bold text-slate-800">
+              Kartu Pasangan • Perkalian ${quiz.n} (${quiz.index + 1}/${total})
+            </div>
+            <div class="w-10"></div>
+          </div>
+
+          <!-- Flip Card Container -->
+          <div onclick="flipFlashcard()" class="perspective-1000 cursor-pointer my-8">
+            <div id="flashcardBox" class="relative w-full h-80 rounded-3xl shadow-xl transition-transform duration-500 transform-style-3d bg-white border-2 border-amber-200 flex flex-col items-center justify-center p-8 text-center ${quiz.flipped ? 'rotate-y-180' : ''}">
+              
+              <!-- Front Side -->
+              <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl">
+                <span class="text-xs font-black text-amber-700 uppercase tracking-wider mb-4">Ketuk Untuk Melihat Jawaban 👆</span>
+                <div class="font-baloo text-6xl font-extrabold text-slate-900">
+                  ${q.a} × ${q.b}
+                </div>
+              </div>
+
+              <!-- Back Side -->
+              <div class="absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-3xl border-2 border-teal-300">
+                <span class="text-xs font-black text-teal-700 uppercase tracking-wider mb-2">Hasil Perkalian</span>
+                <div class="font-baloo text-7xl font-extrabold text-emerald-600">
+                  ${q.correct}
+                </div>
+                <span class="text-xs text-slate-500 font-bold mt-4">${q.a} dikali ${q.b} sama dengan ${q.correct}</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-4">
+            <button onclick="prevFlashcard()" ${quiz.index === 0 ? 'disabled class="opacity-40 cursor-not-allowed"' : ''} class="flex-1 py-3.5 rounded-2xl bg-slate-200 text-slate-800 font-extrabold text-sm">
+              ← Kartu Sebelumnya
+            </button>
+            <button onclick="nextFlashcard()" class="flex-1 py-3.5 rounded-2xl bg-teal-500 text-white font-extrabold text-sm shadow-md">
+              Kartu Berikutnya →
+            </button>
+          </div>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'practice');
+    }
+
+    function flipFlashcard() {
+      sounds.playPop();
+      quiz.flipped = !quiz.flipped;
+      renderFlashcardView();
+    }
+
+    function nextFlashcard() {
+      sounds.playPop();
+      quiz.flipped = false;
+      if (quiz.index < quiz.qs.length - 1) {
+        quiz.index++;
+        renderFlashcardView();
+      } else {
+        renderStudentPractice();
+        showToast('Selesai mengulas seluruh kartu hafalan! 🎉', 'success');
+      }
+    }
+
+    function prevFlashcard() {
+      sounds.playPop();
+      quiz.flipped = false;
+      if (quiz.index > 0) {
+        quiz.index--;
+        renderFlashcardView();
+      }
+    }
+
+    async function savePracticeResultToSupabase(gameType, table, score, totalQuestions) {
+      if (!supabaseReady || !sb || !currentStudent?.id) {
+        console.warn('Practice result belum disimpan: Supabase/student belum siap.');
+        return false;
+      }
+
+      const { error } = await sb.from('practice_results').insert({
+        student_id: currentStudent.id,
+        game_type: gameType,
+        multiplication_table: table,
+        score: score,
+        total_questions: totalQuestions
+      });
+
+      if (error) {
+        console.error('PRACTICE RESULT ERROR:', error);
+        showToast('Hasil latihan belum tersimpan ke server.', 'error');
+        return false;
+      }
+
+      return true;
+    }
+
+    async function finishPracticeQuiz() {
+      const score = quiz.score;
+      const gameType = quiz.type || 'practice';
+      await savePracticeResultToSupabase(gameType, quiz.n, score, quiz.qs.length);
+
+      if (score >= 8) {
+        sounds.playFanfare();
+        launchConfetti();
+      }
+
+      const html = `
+        <div class="max-w-md mx-auto bg-white rounded-3xl p-8 border border-slate-100 shadow-xl text-center space-y-6">
+          <div class="w-24 h-24 mx-auto animate-float">
+            ${score >= 8 ? SVGIllustrations.trophyStar : SVGIllustrations.rocketPencil}
+          </div>
+
+          <h2 class="font-baloo text-3xl font-extrabold text-slate-900">
+            ${score >= 8 ? 'Latihan Selesai dengan Baik!' : 'Terus Berlatih!'}
+          </h2>
+
+          <p class="text-slate-500 text-sm font-semibold">
+            Kamu telah menyelesaikan 10 soal latihan Perkalian ${quiz.n}.
+          </p>
+
+          <div class="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div>
+              <strong class="block font-baloo text-2xl text-emerald-600">${score}</strong>
+              <span class="text-xs text-slate-400 font-bold">Benar</span>
+            </div>
+            <div>
+              <strong class="block font-baloo text-2xl text-rose-500">${10 - score}</strong>
+              <span class="text-xs text-slate-400 font-bold">Salah</span>
+            </div>
+            <div>
+              <strong class="block font-baloo text-2xl text-slate-700">10</strong>
+              <span class="text-xs text-slate-400 font-bold">Total Soal</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-amber-800 bg-amber-50 p-3.5 rounded-xl border border-amber-200/60 font-semibold">
+            Ingat: Hasil latihan belum mengubah status menjadi 'Lulus'. Kamu perlu melakukan <strong>Setoran Resmi</strong> saat Guru membuka sesi di kelas.
+          </p>
+
+          <div class="flex items-center gap-3">
+            <button onclick="renderStudentPractice()" class="flex-1 py-3.5 rounded-2xl bg-teal-500 text-white font-extrabold text-sm shadow-md">
+              Latihan Lagi
+            </button>
+            <button onclick="renderStudentHome()" class="flex-1 py-3.5 rounded-2xl bg-slate-100 text-slate-700 font-extrabold text-sm">
+              Beranda
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'practice');
+    }
+
+    async function loadActiveSubmissionSession() {
+      if (!supabaseReady || !currentStudent) return null;
+      const { data, error } = await sb
+        .from('submission_sessions')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+
+    async function renderStudentSubmit() {
+      sounds.playPop();
+      let session = null;
+      try {
+        session = await loadActiveSubmissionSession();
+      } catch (err) {
+        console.error(err);
+        showToast('Gagal mengambil sesi setoran.', 'error');
+      }
+
+      const html = `
+        <div class="max-w-xl mx-auto space-y-6">
+          
+          <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <button onclick="renderStudentHome()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center">
+                ←
+              </button>
+              <div>
+                <h1 class="font-baloo text-2xl font-extrabold text-slate-900">Setoran Resmi Perkalian</h1>
+                <p class="text-slate-500 text-xs font-bold">Verifikasi nilai resmi langsung dari Guru</p>
+              </div>
+            </div>
+            <div class="w-12 h-12">
+              ${SVGIllustrations.trophyStar}
+            </div>
+          </div>
+
+          ${session ? `
+            <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-xl space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-black">SESI SETORAN AKTIF</span>
+                <span class="text-xs font-bold text-amber-100">Minimal ${session.pass}/10 untuk Lulus</span>
+              </div>
+              <div>
+                <h2 class="font-baloo text-3xl font-extrabold">Ujian Perkalian ${session.table}</h2>
+                <p class="text-amber-100 text-xs font-semibold mt-1">Dibuat oleh Guru • 10 Soal Acak</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+              <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">TOKEN SETORAN DARI GURU</label>
+                <input id="tokenInput" type="text" maxlength="6" placeholder="Contoh: X7K2P" class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 uppercase font-mono font-black text-center text-2xl tracking-widest text-slate-800 focus:outline-none focus:border-amber-500 bg-slate-50">
+              </div>
+
+              <button onclick="verifyAndStartOfficialQuiz()" class="btn-bounce w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-lg shadow-lg shadow-amber-500/20">
+                Mulai Ujian Setoran →
+              </button>
+            </div>
+          ` : `
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm text-center space-y-4">
+              <div class="w-20 h-20 mx-auto opacity-40">
+                ${SVGIllustrations.mascotOwl}
+              </div>
+              <h2 class="font-baloo text-2xl font-extrabold text-slate-800">Belum Ada Sesi Setoran Aktif</h2>
+              <p class="text-slate-500 text-sm font-semibold max-w-sm mx-auto">
+                Minta Gurumu di kelas untuk membuka sesi setoran dan memberikan Token perkalian.
+              </p>
+            </div>
+          `}
+
+          <div class="bg-slate-100/80 p-4 rounded-2xl text-xs text-slate-500 font-semibold space-y-1">
+            <div class="font-bold text-slate-700">Catatan Penting:</div>
+            <p>• Jika kamu mencapai skor minimal lulus, status perkalianmu akan otomatis berubah menjadi <strong class="text-emerald-600">'Lulus ✓'</strong>.</p>
+            <p>• Hasil setoran tersimpan permanen di riwayat nilai.</p>
+          </div>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'submit');
+    }
+
+    async function verifyAndStartOfficialQuiz() {
+      const tokenInp = document.getElementById('tokenInput')?.value.trim().toUpperCase();
+      let sess = null;
+      try {
+        sess = await loadActiveSubmissionSession();
+      } catch (err) {
+        console.error(err);
+        showToast('Gagal memeriksa sesi setoran.', 'error');
+        return;
+      }
+
+      if (!sess || tokenInp !== sess.token) {
+        sounds.playWrong();
+        showToast('Token tidak cocok atau sesi telah ditutup!', 'error');
+        return;
+      }
+
+      const { data: existing, error } = await sb
+        .from('submission_results')
+        .select('id')
+        .eq('session_id', sess.id)
+        .eq('student_id', currentStudent.id)
+        .maybeSingle();
+      if (error) {
+        console.error(error);
+        showToast('Gagal memeriksa riwayat setoran.', 'error');
+        return;
+      }
+      if (existing) {
+        showToast('Kamu sudah pernah mengikuti sesi setoran ini.', 'error');
+        return;
+      }
+
+      startOfficialQuiz(sess);
+    }
+
+    function generateOfficialQuestions(table) {
+      // V1: 10 soal, satu kali untuk setiap faktor 1–10.
+      // Skor selalu mudah dihitung: 1 jawaban benar = 1 poin.
+      const multipliers = Array.from({ length: 10 }, (_, i) => i + 1)
+        .sort(() => Math.random() - 0.5);
+
+      return multipliers.map(multiplier => {
+        const correct = table * multiplier;
+        const options = new Set([correct]);
+
+        while (options.size < 4) {
+          const delta = [-table, table, -2 * table, 2 * table, -1, 1, 2, -2][Math.floor(Math.random() * 8)];
+          const val = correct + delta;
+          if (val > 0) options.add(val);
+        }
+
+        return {
+          a: table,
+          b: multiplier,
+          correct,
+          correctMultiplier: multiplier,
+          options: [...options].sort(() => Math.random() - 0.5)
+        };
+      });
+    }
+
+    function startOfficialQuiz(session) {
+      sounds.playPop();
+      quiz = {
+        n: session.multiplication_table,
+        type: 'official',
+        sessionId: session.id,
+        pass: session.pass_score,
+        qs: generateOfficialQuestions(session.multiplication_table),
+        index: 0,
+        score: 0,
+        locked: false
+      };
+      renderOfficialQuizView();
+    }
+
+    function renderOfficialQuizView() {
+      const q = quiz.qs[quiz.index];
+      const total = quiz.qs.length;
+      const progressPct = ((quiz.index) / total) * 100;
+
+      const html = `
+        <div class="max-w-xl mx-auto space-y-6">
+          
+          <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <div class="flex-1">
+              <div class="flex justify-between text-xs font-bold text-slate-500 mb-1.5">
+                <span>Setoran Perkalian ${quiz.n} • Soal ${quiz.index + 1}/${total}</span>
+                <span class="text-amber-600 font-black">RESMI</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-500 transition-all duration-300 rounded-full" style="width: ${progressPct}%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl text-center space-y-6">
+            <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase">
+              UJIAN SETORAN RESMI
+            </span>
+
+            <div class="font-baloo text-6xl font-extrabold text-slate-900 my-2">
+              ${q.a} × ${q.b} = ?
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              ${q.options.map(val => `
+                <button onclick="answerOfficial(${val})" class="btn-bounce p-5 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-950 font-baloo font-extrabold text-3xl">
+                  ${val}
+                </button>
+              `).join('')}
+            </div>
+
+            <div id="officialFeedback" class="min-h-[40px]"></div>
+          </div>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'submit');
+    }
+
+    function answerOfficial(val) {
+      if (quiz.locked) return;
+      quiz.locked = true;
+
+      const q = quiz.qs[quiz.index];
+      const isCorrect = (val === q.correct);
+
+      if (isCorrect) {
+        quiz.score++;
+        sounds.playCorrect();
+      } else {
+        sounds.playWrong();
+      }
+
+      const feedbackEl = document.getElementById('officialFeedback');
+      feedbackEl.innerHTML = `
+        <div class="p-3 rounded-xl ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} font-black text-sm">
+          ${isCorrect ? '✓ Jawaban Tersimpan' : '✕ Jawaban Tersimpan'}
+        </div>
+      `;
+
+      setTimeout(() => {
+        quiz.index++;
+        quiz.locked = false;
+        if (quiz.index >= quiz.qs.length) {
+          finishOfficialQuiz();
+        } else {
+          renderOfficialQuizView();
+        }
+      }, 500);
+    }
+
+    async function finishOfficialQuiz() {
+      const sess = { id: quiz.sessionId, table: quiz.n, pass: quiz.pass };
+      const score = quiz.score;
+      const passed = score >= sess.pass;
+
+      try {
+        const { error: resultError } = await sb
+          .from('submission_results')
+          .insert({
+            session_id: sess.id,
+            student_id: currentStudent.id,
+            score,
+            total_questions: quiz.qs.length,
+            passed
+          });
+        if (resultError) throw resultError;
+
+        if (passed) {
+          const { error: progressError } = await sb
+            .from('student_progress')
+            .update({ status: 'done', updated_at: new Date().toISOString() })
+            .eq('student_id', currentStudent.id)
+            .eq('multiplication_table', sess.table);
+          if (progressError) throw progressError;
+          currentStudent.progress[sess.table] = 'done';
+          sounds.playFanfare();
+          launchConfetti();
+        } else {
+          if (currentStudent.progress[sess.table] !== 'done') {
+            const { error: progressError } = await sb
+              .from('student_progress')
+              .update({ status: 'progress', updated_at: new Date().toISOString() })
+              .eq('student_id', currentStudent.id)
+              .eq('multiplication_table', sess.table);
+            if (progressError) throw progressError;
+            currentStudent.progress[sess.table] = 'progress';
+          }
+          sounds.playWrong();
+        }
+
+        // Cache progres resmi di browser agar dashboard guru pada browser yang sama
+        // tetap dapat memetakan UUID Supabase ke nama siswa meskipun RLS membatasi SELECT.
+        try {
+          const identityKey = 'misi_perkalian_student_identity_v1';
+          const identityMap = JSON.parse(localStorage.getItem(identityKey) || '{}');
+          identityMap[String(currentStudent.id)] = {
+            id: currentStudent.id,
+            name: currentStudent.name,
+            username: currentStudent.username || '',
+            avatar: currentStudent.avatar || '👧',
+            auth_user_id: currentStudent.auth_user_id || '',
+            progress: { ...currentStudent.progress }
+          };
+          localStorage.setItem(identityKey, JSON.stringify(identityMap));
+        } catch (cacheErr) {
+          console.warn('Gagal menyimpan cache progres siswa:', cacheErr);
+        }
+
+        currentStudent.history = currentStudent.history || [];
+        currentStudent.history.unshift({
+          kind: `Setoran Perkalian ${sess.table}`,
+          table: sess.table,
+          score,
+          totalQuestions: quiz.qs.length,
+          passed,
+          date: new Date().toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })
+        });
+
+        const html = `
+          <div class="max-w-md mx-auto bg-white rounded-3xl p-8 border border-slate-100 shadow-xl text-center space-y-6">
+            <div class="w-24 h-24 mx-auto animate-float">
+              ${passed ? SVGIllustrations.trophyStar : SVGIllustrations.mascotOwl}
+            </div>
+
+            <h2 class="font-baloo text-3xl font-extrabold text-slate-900">
+              ${passed ? 'Selamat! Kamu LULUS! 🎉' : 'Belum Mencapai Target'}
+            </h2>
+
+            <p class="text-slate-500 text-sm font-semibold">
+              Skor Ujian Setoran Perkalian ${sess.table}
+            </p>
+
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-2">
+              <div class="font-baloo text-5xl font-extrabold ${passed ? 'text-emerald-600' : 'text-amber-600'}">
+                ${score} / ${quiz.qs.length}
+              </div>
+              <div class="text-xs font-bold text-slate-400">
+                Target kelulusan: minimal ${sess.pass}/${quiz.qs.length}
+              </div>
+            </div>
+
+            <p class="text-xs font-semibold ${passed ? 'text-emerald-800 bg-emerald-50' : 'text-slate-600 bg-slate-100'} p-3.5 rounded-xl">
+              ${passed ? 'Hebat! Status penguasaan perkalian ini telah dicatat di Supabase.' : 'Latihan lagi dan coba ikuti sesi setoran berikutnya.'}
+            </p>
+
+            <button onclick="renderStudentHome()" class="btn-bounce w-full py-4 rounded-2xl bg-teal-500 hover:bg-teal-600 text-white font-extrabold text-lg shadow-md">
+              Kembali ke Beranda
+            </button>
+          </div>
+        `;
+        document.getElementById('app').innerHTML = studentLayout(html, 'submit');
+      } catch (err) {
+        console.error(err);
+        sounds.playWrong();
+        showToast('Setoran gagal disimpan: ' + (err.message || err), 'error');
+      }
+    }
+
+    async function loadStudentSubmissionHistory(studentId = currentStudent?.id) {
+      if (!supabaseReady || !sb || !studentId) return [];
+
+      // submission_results pada database ini tidak memiliki kolom created_at.
+      // Karena itu jangan memilih/order berdasarkan created_at dari tabel hasil.
+      // Urutan riwayat akan mengikuti waktu sesi (submission_sessions.created_at).
+      const { data: results, error: resultError } = await sb
+        .from('submission_results')
+        .select('id,session_id,score,total_questions,passed')
+        .eq('student_id', studentId);
+      if (resultError) throw resultError;
+
+      const rows = results || [];
+      if (!rows.length) return [];
+
+      const sessionIds = [...new Set(rows.map(r => r.session_id).filter(Boolean))];
+      let sessions = [];
+      if (sessionIds.length) {
+        const { data: sessionRows, error: sessionError } = await sb
+          .from('submission_sessions')
+          .select('id,multiplication_table,pass_score,created_at')
+          .in('id', sessionIds);
+        if (sessionError) throw sessionError;
+        sessions = sessionRows || [];
+      }
+
+      const sessionById = Object.fromEntries(sessions.map(s => [String(s.id), s]));
+      // Sesi memiliki created_at, sehingga hasil dapat ditampilkan dari yang terbaru.
+      const sortedRows = [...rows].sort((a, b) => {
+        const da = sessionById[String(a.session_id)]?.created_at || '';
+        const db = sessionById[String(b.session_id)]?.created_at || '';
+        return String(db).localeCompare(String(da));
+      });
+      return sortedRows.map(r => {
+        const sess = sessionById[String(r.session_id)] || {};
+        const table = sess.multiplication_table ?? '?';
+        const dateSource = r.created_at || sess.created_at;
+        return {
+          kind: `Setoran Perkalian ${table}`,
+          table,
+          score: Number(r.score || 0),
+          passed: !!r.passed,
+          date: dateSource ? new Date(dateSource).toLocaleDateString('id-ID', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          }) : '-'
+        };
+      });
+    }
+
+    async function renderStudentHistory() {
+      sounds.playPop();
+      try {
+        currentStudent.history = await loadStudentSubmissionHistory(currentStudent?.id);
+      } catch (err) {
+        console.error('Gagal memuat riwayat setoran resmi:', err);
+        showToast('Riwayat setoran belum dapat dimuat dari database.', 'error');
+      }
+      const history = currentStudent.history || [];
+
+      const html = `
+        <div class="space-y-6 max-w-2xl mx-auto">
+          
+          <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <button onclick="renderStudentHome()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center">
+                ←
+              </button>
+              <div>
+                <h1 class="font-baloo text-2xl font-extrabold text-slate-900">Riwayat Setoran Resmi</h1>
+                <p class="text-slate-500 text-xs font-bold">Catatan nilai ujian perkalianmu</p>
+              </div>
+            </div>
+            <div class="w-10 h-10">
+              ${SVGIllustrations.trophyStar}
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm divide-y divide-slate-100">
+            ${history.length > 0 ? history.map(h => `
+              <div class="py-4 flex items-center justify-between first:pt-0 last:pb-0">
+                <div>
+                  <strong class="block text-slate-800 font-extrabold text-base">${esc(h.kind)}</strong>
+                  <span class="text-xs text-slate-400 font-bold">${esc(h.date)}</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-baloo text-2xl font-extrabold ${h.passed ? 'text-emerald-600' : 'text-slate-600'}">
+                    ${h.score}/${h.totalQuestions || 10}
+                  </span>
+                  <span class="block text-xs font-black ${h.passed ? 'text-emerald-600' : 'text-slate-400'}">
+                    ${h.passed ? '✓ LULUS' : 'BELUM'}
+                  </span>
+                </div>
+              </div>
+            `).join('') : `
+              <div class="text-center py-8 text-slate-400 font-bold text-sm">
+                Belum ada riwayat setoran resmi yang tercatat.
+              </div>
+            `}
+          </div>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = studentLayout(html, 'history');
+    }
+
+    function teacherLayout(contentHtml) {
+      return `
+        <div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+          
+          <!-- Mobile Top Header -->
+          <div class="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
+            <div class="font-baloo font-extrabold text-xl tracking-tight text-indigo-400">Panel Guru</div>
+            <button onclick="handleTeacherLogout()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-xs font-bold border border-slate-700">
+              Keluar
+            </button>
+          </div>
+
+          <!-- Sidebar -->
+          <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white p-6 sticky top-0 h-screen z-20 shrink-0">
+            <div class="font-baloo font-extrabold text-2xl text-indigo-400 mb-8">
+              Panel Guru 📊
+            </div>
+
+            <nav class="space-y-2 flex-1">
+              <button onclick="renderTeacherHome()" class="w-full px-4 py-3 rounded-2xl font-extrabold text-sm text-left flex items-center gap-3 bg-indigo-600 text-white shadow-md">
+                <span>▥</span> Dashboard
+              </button>
+            </nav>
+
+            <div class="pt-6 border-t border-slate-800">
+              <button onclick="handleTeacherLogout()" class="w-full px-4 py-3 rounded-2xl font-extrabold text-sm text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 text-left flex items-center gap-3 transition-colors">
+                <span>↪</span> Keluar
+              </button>
+            </div>
+          </aside>
+
+          <!-- Main Content -->
+          <main class="flex-1 p-4 sm:p-8 max-w-6xl w-full mx-auto">
+            ${contentHtml}
+          </main>
+        </div>
+      `;
+    }
+
+    async function ensureClassRosterInSupabase() {
+      if (!supabaseReady || !sb) return;
+
+      const { data: existing, error: readError } = await sb
+        .from('students')
+        .select('id,name,username,auth_user_id,avatar')
+        .order('name', { ascending: true });
+      if (readError) {
+        console.warn('Roster Supabase belum bisa dibaca:', readError);
+        return;
+      }
+
+      const existingByUsername = Object.fromEntries((existing || []).map(s => [String(s.username || '').toLowerCase(), s]));
+      const existingByName = Object.fromEntries((existing || []).map(s => [String(s.name || '').trim().toLowerCase(), s]));
+      const missing = CLASS_ROSTER
+        .filter(([,name,username]) => !existingByUsername[username] && !existingByName[name.toLowerCase()])
+        .map(([id,name,username,avatar]) => ({
+          id: crypto.randomUUID(),
+          name, username, avatar
+        }));
+
+      if (missing.length) {
+        const { error: insertError } = await sb.from('students').insert(missing);
+        if (insertError) {
+          console.warn('Sebagian roster belum dapat dibuat di Supabase:', insertError);
+          return;
+        }
+      }
+    }
+
+    async function syncTeacherStudentsFromSupabase() {
+      if (!supabaseReady || !sb) return;
+
+      // FASE 1: pastikan roster 16 siswa tersedia di Supabase sebelum membaca progres.
+      try { await ensureClassRosterInSupabase(); } catch (err) { console.warn('Gagal memastikan roster kelas:', err); }
+
+      // Jangan pernah mengosongkan daftar siswa lokal hanya karena query
+      // Supabase dibatasi RLS atau belum mengembalikan baris.
+      const localStudents = Array.isArray(state.students) ? [...state.students] : [];
+      let students = [];
+
+      try {
+        const { data, error } = await sb
+          .from('students')
+          .select('*')
+          .order('name', { ascending: true });
+        if (!error && Array.isArray(data)) students = data;
+        else if (error) console.warn('Daftar students tidak bisa dibaca:', error);
+      } catch (err) {
+        console.warn('Query students gagal:', err);
+      }
+
+      // Ambil progres resmi jika policy Supabase mengizinkannya.
+      const progressByStudent = {};
+      try {
+        const { data: progressRows, error: progressError } = await sb
+          .from('student_progress')
+          .select('student_id,multiplication_table,status,updated_at');
+        if (!progressError) {
+          (progressRows || []).forEach(row => {
+            if (!progressByStudent[row.student_id]) {
+              progressByStudent[row.student_id] = {2:'none',3:'none',4:'none',5:'none',6:'none',7:'none',8:'none',9:'none'};
+            }
+            progressByStudent[row.student_id][row.multiplication_table] = row.status;
+          });
+        } else {
+          console.warn('Progres student_progress tidak bisa dibaca:', progressError);
+        }
+      } catch (err) {
+        console.warn('Query student_progress gagal:', err);
+      }
+
+      // Fallback: hasil setoran resmi juga menjadi sumber progres.
+      // Ini membuat dashboard tetap bisa menandai siswa yang lulus meskipun
+      // policy SELECT student_progress/students belum sempurna.
+      try {
+        const { data: resultRows, error: resultError } = await sb
+          .from('submission_results')
+          .select('session_id,student_id,passed');
+        if (!resultError) {
+          const sessionIds = [...new Set((resultRows || []).map(r => r.session_id).filter(Boolean))];
+          let sessionById = {};
+          if (sessionIds.length) {
+            const { data: sessionRows, error: sessionError } = await sb
+              .from('submission_sessions')
+              .select('id,multiplication_table')
+              .in('id', sessionIds);
+            if (!sessionError) {
+              (sessionRows || []).forEach(sess => { sessionById[sess.id] = sess.multiplication_table; });
+            }
+          }
+
+          (resultRows || []).forEach(row => {
+            const table = sessionById[row.session_id];
+            if (!table || !row.student_id) return;
+            if (!progressByStudent[row.student_id]) {
+              progressByStudent[row.student_id] = {2:'none',3:'none',4:'none',5:'none',6:'none',7:'none',8:'none',9:'none'};
+            }
+            if (row.passed) progressByStudent[row.student_id][table] = 'done';
+            else if (progressByStudent[row.student_id][table] !== 'done') progressByStudent[row.student_id][table] = 'progress';
+          });
+        } else {
+          console.warn('Hasil submission_results tidak bisa dibaca:', resultError);
+        }
+      } catch (err) {
+        console.warn('Query submission_results gagal:', err);
+      }
+
+      // Identitas siswa yang pernah login di browser ini.
+      let identityMap = {};
+      try {
+        identityMap = JSON.parse(localStorage.getItem('misi_perkalian_student_identity_v1') || '{}');
+      } catch (cacheErr) {
+        console.warn('Identity cache tidak dapat dibaca:', cacheErr);
+      }
+
+      // Jika RLS menghalangi query students, jangan pernah mengosongkan roster.
+      // Gunakan roster lokal/cache sebagai fallback.
+      const fallbackRoster = [
+        ['s1','Maysa','👧'],['s2','Attaya','👦'],['s3','Aji','🧑'],['s4','Aisah','👩'],
+        ['s5','Revly','👦'],['s6','Anisah','👧'],['s7','Rafa','👦'],['s8','Sahrehan','👦'],
+        ['s9','Aisyah','👧'],['s10','Arkan','👦'],['s11','Aldo','👦'],['s12','Mondi','👦'],
+        ['s13','Chelsea','👧'],['s14','Noval','👦'],['s15','Alvido','👦'],['s16','Satty','👧']
+      ].map(([id,name,avatar]) => ({
+        id, name, avatar, pin:'1234',
+        progress:{2:'none',3:'none',4:'none',5:'none',6:'none',7:'none',8:'none',9:'none'},
+        history:[]
+      }));
+
+      const emptyProgressMap = () => ({2:'none',3:'none',4:'none',5:'none',6:'none',7:'none',8:'none',9:'none'});
+      const baseStudents = students.length ? students : (localStudents.length ? localStudents : fallbackRoster);
+      const oldStudentsById = Object.fromEntries(localStudents.map(s => [String(s.id), s]));
+      const serverStudentById = Object.fromEntries(students.map(s => [String(s.id), s]));
+      const serverStudentByUsername = Object.fromEntries(students.map(s => [String(s.username || '').trim().toLowerCase(), s]));
+      const serverStudentByName = Object.fromEntries(students.map(s => [String(s.name || '').trim().toLowerCase(), s]));
+
+      // Bangun roster dashboard dari data server. Progress selalu diambil berdasarkan
+      // UUID student_id Supabase, lalu dipetakan kembali ke siswa yang sama.
+      state.students = baseStudents.map(student => {
+        const sid = String(student.id);
+        const old = oldStudentsById[sid] || {};
+        const cached = identityMap[sid] || {};
+        const progress = { ...emptyProgressMap(), ...(old.progress || {}) };
+        if (progressByStudent[sid]) Object.assign(progress, progressByStudent[sid]);
+
+        return {
+          ...old,
+          ...student,
+          avatar: student.avatar || cached.avatar || old.avatar || '👧',
+          progress,
+          history: old.history || []
+        };
+      });
+
+      // Sambungkan progres server ke siswa berdasarkan UUID terlebih dahulu.
+      // Jika UUID lokal lama berbeda, gunakan username/nama dari baris students
+      // yang baru dibaca dari Supabase. Ini membuat dashboard tetap stabil setelah
+      // roster lokal dan roster Supabase tersinkronisasi.
+      Object.entries(progressByStudent).forEach(([serverId, progress]) => {
+        const serverStudent = serverStudentById[serverId] || identityMap[serverId];
+        let target = state.students.find(s => String(s.id) === serverId);
+
+        if (!target && serverStudent) {
+          const usernameKey = String(serverStudent.username || '').trim().toLowerCase();
+          const nameKey = String(serverStudent.name || '').trim().toLowerCase();
+          target = (usernameKey && serverStudentByUsername[usernameKey])
+            ? state.students.find(s => String(s.username || '').trim().toLowerCase() === usernameKey)
+            : null;
+          if (!target && nameKey) {
+            target = state.students.find(s => String(s.name || '').trim().toLowerCase() === nameKey);
+          }
+        }
+
+        if (target) target.progress = { ...emptyProgressMap(), ...(target.progress || {}), ...progress };
+      });
+
+      console.log('[Misi Perkalian] Sinkronisasi dashboard:', {
+        studentsFromSupabase: students.length,
+        progressRows: Object.keys(progressByStudent).length,
+        rosterShown: state.students.length,
+        doneStudents: state.students.filter(s => Object.values(s.progress || {}).includes('done')).map(s => ({name:s.name, progress:s.progress}))
+      });
+
+      saveState();
+    }
+
+    async function renderTeacherHome(silent = false) {
+      const teacherReady = await ensureTeacherAuth();
+      if (!teacherReady) {
+        stopTeacherRealtime();
+        return;
+      }
+
+      if (!silent) sounds.playPop();
+
+      // Selalu ambil ulang siswa + progres resmi dari Supabase.
+      // Ini memastikan hasil setoran yang baru saja lulus langsung muncul di dashboard guru.
+      try {
+        await syncTeacherStudentsFromSupabase();
+      } catch (err) {
+        console.error('Gagal menyinkronkan progres siswa:', err);
+        showToast('Progres terbaru belum berhasil dimuat dari database.', 'error');
+      }
+
+      // Sinkronkan sesi aktif dari Supabase agar dashboard guru tetap benar setelah refresh.
+      try {
+        state.session = await loadActiveTeacherSession();
+      } catch (err) {
+        console.error('Gagal memuat sesi guru:', err);
+        state.session = null;
+      }
+
+      const totalStudents = state.students.length;
+      const tables = [2,3,4,5,6,7,8,9];
+
+      const getDoneCount = s => tables.filter(n => s.progress[n] === 'done').length;
+      const getCurrentTable = s => {
+        const learning = tables.find(n => s.progress[n] === 'progress');
+        if (learning) return learning;
+        const lastDone = [...tables].reverse().find(n => s.progress[n] === 'done');
+        return lastDone || null;
+      };
+
+      const completeStudents = state.students.filter(s => tables.every(n => s.progress[n] === 'done'));
+      // Siswa dianggap sedang berjuang jika sudah mulai perjalanan:
+      // punya minimal satu checkpoint yang lulus ATAU sedang dalam status progress.
+      // Jadi siswa yang sudah lulus ×2 tetapi belum selesai ×9 tetap masuk
+      // kategori "Sedang Berjuang", bukan "Masih di Awal".
+      const activeStudents = state.students.filter(s => {
+        const done = getDoneCount(s);
+        const hasProgress = s.progress && Object.values(s.progress).includes('progress');
+        return !tables.every(n => s.progress[n] === 'done') && (done > 0 || hasProgress);
+      });
+      const earlyStudents = state.students.filter(s => {
+        const done = getDoneCount(s);
+        const hasProgress = s.progress && Object.values(s.progress).includes('progress');
+        return !tables.every(n => s.progress[n] === 'done') && done === 0 && !hasProgress;
+      });
+      const totalCheckpoints = totalStudents * tables.length;
+      const masteredCheckpoints = state.students.reduce((sum,s) => sum + getDoneCount(s), 0);
+      const masteredPct = totalCheckpoints ? Math.round(masteredCheckpoints / totalCheckpoints * 100) : 0;
+
+      const getStatus = s => {
+        if (tables.every(n => s.progress[n] === 'done')) return {key:'done', label:'MISI SELESAI', sub:'×9 tuntas'};
+
+        const done = getDoneCount(s);
+        const hasProgress = s.progress && Object.values(s.progress).includes('progress');
+        if (done > 0 || hasProgress) {
+          const next = tables.find(n => s.progress[n] !== 'done');
+          return {key:'progress', label:'SEDANG BERJUANG', sub:next ? `Menuju ×${next}` : 'Lanjutkan misi'};
+        }
+
+        return {key:'start', label:'BELUM DIMULAI', sub:'Siap meluncur'};
+      };
+
+      const nodeHTML = (s, n) => {
+        const st = s.progress[n] || 'none';
+        const current = getCurrentTable(s) === n;
+        return `
+          <div class="mission-node" title="${esc(s.name)} • ×${n} • ${st === 'done' ? 'Dikuasai' : st === 'progress' ? 'Sedang berlatih' : 'Belum dijelajahi'}">
+            ${current ? `<div class="mission-rocket" aria-hidden="true">🚀</div><div class="mission-flame" aria-hidden="true">🔥</div>` : ''}
+            <div class="mission-planet ${st}">${st === 'done' ? '✓' : `×${n}`}</div>
+          </div>
+        `;
+      };
+
+      const studentRows = state.students.map((s, index) => {
+        const doneCount = getDoneCount(s);
+        const current = getCurrentTable(s);
+        const status = getStatus(s);
+        return `
+          <div class="mission-row pop-in" style="animation-delay:${Math.min(index * .035,.45)}s">
+            <div class="mission-grid h-full">
+              <div class="mission-student">
+                <div class="mission-avatar">${s.avatar || '👧'}</div>
+                <div class="min-w-0">
+                  <div class="mission-name">${esc(s.name)}</div>
+                  <div class="mission-sub">${doneCount}/8 checkpoint dikuasai</div>
+                </div>
+              </div>
+              ${tables.map(n => nodeHTML(s,n)).join('')}
+              <div class="flex items-center justify-center">
+                <div class="mission-status ${status.key}">
+                  <span class="big">${status.key === 'done' ? '🏆' : status.key === 'progress' ? '🚀' : '🛰️'}</span>
+                  ${status.label}
+                  <span class="block opacity-70">${status.sub}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const html = `
+        <div class="mission-control -m-4 sm:-m-8 min-h-[calc(100vh+2rem)] p-4 sm:p-8 space-y-6">
+
+          <!-- Mission Control Header -->
+          <section class="mission-hero rounded-[30px] p-6 sm:p-8 lg:p-9 text-white relative">
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-7">
+              <div class="max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-black tracking-widest mb-3">
+                  🚀 MISSION CONTROL • KELAS VI
+                </div>
+                <h1 class="font-baloo text-4xl sm:text-5xl font-black leading-none mb-2">Dashboard Guru</h1>
+                <div class="mt-2 text-white/75 text-xs font-black">Akun: ${esc(currentTeacher?.name || currentTeacher?.id || "Guru")}</div>
+                <p class="text-white/80 font-bold text-sm sm:text-base">
+                  Pantau perjalanan 16 siswa dari ×2 sampai ×9. Setiap planet adalah satu checkpoint penguasaan.
+                </p>
+                <div class="mt-5 flex flex-wrap items-center gap-2">
+                  <div class="bg-white/12 border border-white/15 rounded-2xl px-4 py-2 text-xs font-black">
+                    <span class="opacity-70">Checkpoint dikuasai</span>
+                    <strong class="block text-xl font-baloo">${masteredCheckpoints}/${totalCheckpoints}</strong>
+                  </div>
+                  <div class="bg-white/12 border border-white/15 rounded-2xl px-4 py-2 text-xs font-black">
+                    <span class="opacity-70">Progress kelas</span>
+                    <strong class="block text-xl font-baloo">${masteredPct}%</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center justify-center lg:pr-5">
+                <div class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-[40px] bg-white/10 border-2 border-white/20 flex items-center justify-center">
+                  <div class="text-7xl sm:text-8xl rocket-mini">🚀</div>
+                  <div class="absolute -top-2 -right-2 text-2xl sparkle">✦</div>
+                  <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-yellow-300 text-yellow-950 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-lg">
+                    Menuju ×9!
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Class Overview -->
+          <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="stat-game rounded-[24px] p-4 sm:p-5 bg-white">
+              <div class="text-2xl mb-1">👩‍🚀</div>
+              <div class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Total Siswa</div>
+              <div class="font-baloo text-3xl font-black text-indigo-700">${totalStudents}</div>
+            </div>
+            <div class="stat-game rounded-[24px] p-4 sm:p-5 bg-emerald-50">
+              <div class="text-2xl mb-1">🏆</div>
+              <div class="text-[10px] text-emerald-700/70 font-black uppercase tracking-wider">Tuntas ×9</div>
+              <div class="font-baloo text-3xl font-black text-emerald-700">${completeStudents.length}</div>
+            </div>
+            <div class="stat-game rounded-[24px] p-4 sm:p-5 bg-amber-50">
+              <div class="text-2xl mb-1">🚀</div>
+              <div class="text-[10px] text-amber-700/70 font-black uppercase tracking-wider">Sedang Berjuang</div>
+              <div class="font-baloo text-3xl font-black text-amber-700">${activeStudents.length}</div>
+            </div>
+            <div class="stat-game rounded-[24px] p-4 sm:p-5 bg-indigo-50">
+              <div class="text-2xl mb-1">🛰️</div>
+              <div class="text-[10px] text-indigo-700/70 font-black uppercase tracking-wider">Masih di Awal</div>
+              <div class="font-baloo text-3xl font-black text-indigo-700">${earlyStudents.length}</div>
+            </div>
+          </section>
+
+          <!-- Active Session -->
+          ${state.session ? renderTeacherActiveSession() : `
+            <section class="mission-panel rounded-[26px] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-2xl">📡</div>
+                <div>
+                  <h2 class="font-baloo text-xl font-black text-slate-800">Belum ada misi setoran aktif</h2>
+                  <p class="text-xs text-slate-500 font-bold">Buka setoran resmi ketika siswa siap naik checkpoint.</p>
+                </div>
+              </div>
+              <button onclick="openCreateSessionModal()" class="game-btn px-5 py-3 rounded-2xl bg-indigo-600 text-white font-black text-sm">
+                + Buka Setoran
+              </button>
+            </section>
+          `}
+
+          <!-- Rocket Journey -->
+          <section class="mission-panel rounded-[30px] p-4 sm:p-6">
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-5">
+              <div>
+                <div class="text-[10px] font-black tracking-[.18em] text-indigo-500 uppercase">CLASS PROGRESS MAP</div>
+                <h2 class="font-baloo text-3xl sm:text-4xl font-black text-slate-800 leading-none mt-1">Roket Perjalanan Perkalian</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-bold mt-2">
+                  Roket menunjukkan checkpoint terbaru setiap siswa. Planet hijau = sudah dikuasai.
+                </p>
+              </div>
+              <div class="mission-legend">
+                <span><i class="legend-dot green"></i> Dikuasai</span>
+                <span><i class="legend-dot yellow"></i> Sedang berlatih</span>
+                <span><i class="legend-dot gray"></i> Belum dijelajahi</span>
+                <span><span class="rocket-mini text-lg">🚀</span> Posisi roket</span>
+              </div>
+            </div>
+
+            <div class="mission-scroll">
+              <div class="mission-grid mission-head">
+                <div class="mission-head-student">PETUALANG</div>
+                ${tables.map(n => `<div class="mission-head-cell"><span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-50 text-indigo-700 font-baloo font-black text-base">×${n}</span></div>`).join('')}
+                <div class="mission-head-cell">STATUS</div>
+              </div>
+              ${studentRows || `
+                <div class="py-14 text-center text-slate-400 font-bold">
+                  Belum ada siswa. Tambahkan siswa untuk memulai misi.
+                </div>
+              `}
+            </div>
+
+            <div class="mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t-2 border-dashed border-slate-100">
+              <p class="text-[10px] text-slate-400 font-bold">
+                Tip: klik <strong>Kelola</strong> untuk mengatur progres siswa.
+              </p>
+              <div class="flex gap-2">
+                <button onclick="openAddStudentModal()" class="game-btn px-4 py-2.5 rounded-xl bg-white border-2 border-indigo-100 text-indigo-700 font-black text-xs">
+                  + Tambah Siswa
+                </button>
+                <button onclick="openCreateSessionModal()" class="game-btn px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-white font-black text-xs">
+                  📡 Buka Setoran
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quick student management cards -->
+          <section class="mission-panel rounded-[28px] p-5 sm:p-6">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 class="font-baloo text-2xl font-black text-slate-800">Pusat Kendali Siswa</h2>
+                <p class="text-xs text-slate-500 font-bold">Kelola data atau reset checkpoint tanpa meninggalkan dashboard.</p>
+              </div>
+              <div class="hidden sm:block text-2xl bob">🛰️</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              ${state.students.map(s => {
+                const done = getDoneCount(s);
+                const current = getCurrentTable(s);
+                return `
+                  <div class="rounded-2xl bg-slate-50 border-2 border-slate-100 p-3 flex items-center gap-3">
+                    <div class="text-2xl">${s.avatar || '👧'}</div>
+                    <div class="min-w-0 flex-1">
+                      <div class="font-black text-sm text-slate-800 truncate">${esc(s.name)}</div>
+                      <div class="text-[10px] text-slate-400 font-bold">${done}/8 dikuasai${current ? ` • 🚀 ×${current}` : ''}</div>
+                    </div>
+                    <button onclick="manageStudentModal('${s.id}')" class="shrink-0 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 font-black text-[10px]">
+                      Kelola
+                    </button>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </section>
+
+        </div>
+      `;
+      document.getElementById('app').innerHTML = teacherLayout(html);
+    }
+
+
+    function renderTeacherActiveSession() {
+      const sess = state.session;
+      const count = sess.results?.length || 0;
+
+      return `
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-6 text-white shadow-xl space-y-4 border border-indigo-900">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <span class="px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-300 text-xs font-black uppercase tracking-wider">
+                SESI SETORAN BERLANGSUNG
+              </span>
+              <h2 class="font-baloo text-3xl font-extrabold mt-1">Perkalian ${sess.table}</h2>
+              <p class="text-xs text-slate-300 font-semibold">Bagi Token ini kepada siswa di kelas untuk ujian</p>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 text-center">
+              <span class="text-xs text-indigo-200 font-bold block">TOKEN DIBUKA</span>
+              <div class="font-mono font-black text-3xl tracking-widest text-amber-400">${sess.token}</div>
+            </div>
+
+            <button onclick="closeActiveSessionModal()" class="btn-bounce px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs">
+              Tutup Sesi
+            </button>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800">
+            <div class="text-xs font-extrabold text-slate-300 mb-2">
+              Siswa Sudah Setor (${count}/${state.students.length}):
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold">
+              ${state.students.map(s => {
+                const res = sess.results?.find(r => r.studentId === s.id);
+                return `
+                  <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700 flex items-center justify-between">
+                    <span>${s.avatar || '👧'} ${esc(s.name)}</span>
+                    <span>
+                      ${res ? `<strong class="${res.passed ? 'text-emerald-400' : 'text-amber-300'}">${res.passed ? '✓ Sudah Setor • Lulus' : '✓ Sudah Setor • Belum Lulus'} (${res.score}/10)</strong>` : '<span class="text-slate-500">Belum Setor</span>'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateSessionModal() {
+      sounds.playPop();
+      const html = `
+        <div class="space-y-4">
+          <h2 class="font-baloo text-2xl font-extrabold text-slate-900">Buka Sesi Setoran Baru</h2>
+          <p class="text-slate-500 text-xs font-bold">Pilih angka perkalian yang akan diujikan kepada siswa.</p>
+
+          <div>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">TARGET PERKALIAN</label>
+            <select id="sessionTableSelect" class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-extrabold text-slate-800 bg-slate-50">
+              ${[2,3,4,5,6,7,8,9].map(n => `<option value="${n}">Perkalian ${n}</option>`).join('')}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">SKOR MINIMAL LULUS (DARI 10 SOAL)</label>
+            <select id="sessionPassSelect" class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-extrabold text-slate-800 bg-slate-50">
+              <option value="7">7 / 10</option>
+              <option value="8" selected>8 / 10 (Direkomendasikan)</option>
+              <option value="9">9 / 10</option>
+              <option value="10">10 / 10 (Sempurna)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button onclick="confirmCreateSession()" class="btn-bounce flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md">
+              Buat Sesi & Generate Token
+            </button>
+            <button onclick="closeModal()" class="py-3.5 px-5 rounded-2xl bg-slate-100 text-slate-600 font-extrabold text-sm">
+              Batal
+            </button>
+          </div>
+        </div>
+      `;
+      showModal(html);
+    }
+
+    async function loadActiveTeacherSession() {
+      if (!supabaseReady || !sb) return null;
+      const { data, error } = await sb
+        .from('submission_sessions')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+
+      const { data: results, error: resultError } = await sb
+        .from('submission_results')
+        .select('student_id,score,passed')
+        .eq('session_id', data.id);
+      if (resultError) throw resultError;
+
+      return {
+        id: data.id,
+        table: data.multiplication_table,
+        pass: data.pass_score,
+        token: data.token,
+        results: (results || []).map(r => ({
+          studentId: r.student_id,
+          score: r.score,
+          passed: r.passed
+        })),
+        created: data.created_at
+      };
+    }
+
+    async function confirmCreateSession() {
+      const table = parseInt(document.getElementById('sessionTableSelect').value, 10);
+      const pass = parseInt(document.getElementById('sessionPassSelect').value, 10);
+
+      if (!supabaseReady || !sb) {
+        showToast('Supabase belum siap.', 'error');
+        return;
+      }
+
+      const token = Math.random().toString(36).substring(2, 7).toUpperCase();
+
+      try {
+        // Hanya satu sesi aktif pada satu waktu. Tutup sesi aktif sebelumnya.
+        const { error: closeError } = await sb
+          .from('submission_sessions')
+          .update({ is_active: false })
+          .eq('is_active', true);
+        if (closeError) throw closeError;
+
+        const { data, error } = await sb
+          .from('submission_sessions')
+          .insert({
+            multiplication_table: table,
+            pass_score: pass,
+            token,
+            is_active: true
+          })
+          .select('*')
+          .single();
+        if (error) throw error;
+
+        state.session = {
+          id: data.id,
+          table: data.multiplication_table,
+          pass: data.pass_score,
+          token: data.token,
+          results: [],
+          created: data.created_at
+        };
+
+        closeModal();
+        showToast(`Sesi Setoran Perkalian ${table} dibuka! Token: ${token}`, 'success');
+        renderTeacherHome();
+      } catch (err) {
+        console.error(err);
+        showToast('Sesi gagal dibuat: ' + (err.message || err), 'error');
+      }
+    }
+
+    function closeActiveSessionModal() {
+      sounds.playPop();
+      const html = `
+        <div class="space-y-4 text-center">
+          <div class="text-5xl">⚠</div>
+          <h2 class="font-baloo text-2xl font-extrabold text-slate-900">Tutup Sesi Setoran?</h2>
+          <p class="text-slate-500 text-xs font-semibold">
+            Token tidak akan dapat digunakan lagi oleh siswa.
+          </p>
+          <div class="flex items-center gap-3 pt-2">
+            <button onclick="confirmCloseSession()" class="btn-bounce flex-1 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm">
+              Ya, Tutup Sesi
+            </button>
+            <button onclick="closeModal()" class="flex-1 py-3.5 rounded-2xl bg-slate-100 text-slate-700 font-extrabold text-sm">
+              Batal
+            </button>
+          </div>
+        </div>
+      `;
+      showModal(html);
+    }
+
+    async function confirmCloseSession() {
+      try {
+        if (!supabaseReady || !sb || !state.session?.id) {
+          throw new Error('Sesi aktif tidak ditemukan.');
+        }
+
+        // Penutupan sesi dilakukan melalui RPC security-definer agar RLS
+        // tidak menghalangi guru yang sah untuk menutup sesi.
+        const { data: closed, error } = await sb.rpc('close_submission_session', {
+          p_session_id: state.session.id
+        });
+        if (error) throw error;
+        if (!closed) throw new Error('Sesi tidak ditemukan atau sudah ditutup.');
+
+        state.session = null;
+        closeModal();
+        showToast('Sesi setoran berhasil ditutup. Token sudah tidak aktif.', 'info');
+        renderTeacherHome();
+      } catch (err) {
+        console.error('CLOSE SESSION ERROR:', err);
+        showToast('Gagal menutup sesi: ' + (err.message || err), 'error');
+      }
+    }
+
+    function openAddStudentModal() {
+      sounds.playPop();
+      const avatars = ['👧', '👦', '🧑', '👩', '👨', '🎒', '⭐', '🚀'];
+      const html = `
+        <div class="space-y-4">
+          <h2 class="font-baloo text-2xl font-extrabold text-slate-900">Tambah Siswa Baru</h2>
+
+          <div>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NAMA SISWA</label>
+            <input id="newStudentName" type="text" placeholder="Contoh: Budi" class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-extrabold text-slate-800 bg-slate-50" required>
+          </div>
+
+          <div>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">PIN SISWA (4 DIGIT)</label>
+            <input id="newStudentPin" type="password" maxlength="6" placeholder="1234" value="1234" class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-extrabold text-slate-800 bg-slate-50" required>
+          </div>
+
+          <div>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">PILIH AVATAR</label>
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+              ${avatars.map((av, idx) => `
+                <button type="button" onclick="selectAvatar('${av}')" class="avatar-opt w-10 h-10 rounded-xl bg-slate-100 text-2xl flex items-center justify-center hover:bg-slate-200 ${idx === 0 ? 'ring-2 ring-indigo-500' : ''}" data-avatar="${av}">
+                  ${av}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button onclick="confirmAddStudent()" class="btn-bounce flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md">
+              Simpan Siswa
+            </button>
+            <button onclick="closeModal()" class="py-3.5 px-5 rounded-2xl bg-slate-100 text-slate-600 font-extrabold text-sm">
+              Batal
+            </button>
+          </div>
+        </div>
+      `;
+      showModal(html);
+      window.selectedAvatar = '👧';
+    }
+
+    function selectAvatar(av) {
+      sounds.playPop();
+      window.selectedAvatar = av;
+      document.querySelectorAll('.avatar-opt').forEach(btn => {
+        if (btn.dataset.avatar === av) btn.classList.add('ring-2', 'ring-indigo-500');
+        else btn.classList.remove('ring-2', 'ring-indigo-500');
+      });
+    }
+
+    function confirmAddStudent() {
+      const name = document.getElementById('newStudentName').value.trim();
+      const pin = document.getElementById('newStudentPin').value.trim();
+
+      if (!name || !pin) {
+        showToast('Lengkapi Nama dan PIN!', 'error');
+        return;
+      }
+
+      const newStudent = {
+        id: 's_' + Date.now(),
+        name,
+        pin,
+        avatar: window.selectedAvatar || '👧',
+        progress: { 2: 'none', 3: 'none', 4: 'none', 5: 'none', 6: 'none', 7: 'none', 8: 'none', 9: 'none' },
+        history: []
+      };
+
+      state.students.push(newStudent);
+      saveState();
+      closeModal();
+      showToast(`Siswa ${name} berhasil ditambahkan!`, 'success');
+      renderTeacherHome();
+    }
+
+    function manageStudentModal(studentId) {
+      sounds.playPop();
+      const student = state.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      const html = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="text-4xl">${student.avatar || '👧'}</div>
+            <div>
+              <h2 class="font-baloo text-2xl font-extrabold text-slate-900">${esc(student.name)}</h2>
+              <span class="text-xs text-slate-400 font-bold">Kelola Progres & Data Siswa</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">RESET STATUS PERKALIAN</label>
+            <div class="grid grid-cols-4 gap-2">
+              ${[2,3,4,5,6,7,8,9].map(n => `
+                <button onclick="resetTableStatus('${student.id}', ${n})" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-100 hover:text-rose-700 text-slate-800 font-extrabold text-xs text-center">
+                  ×${n} (${student.progress[n]})
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button onclick="closeModal()" class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-extrabold text-sm">
+              Tutup
+            </button>
+          </div>
+        </div>
+      `;
+      showModal(html);
+    }
+
+    async function resetTableStatus(studentId, table) {
+      const student = state.students.find(s => String(s.id) === String(studentId));
+      if (!student) return;
+
+      const currentStatus = student.progress?.[table] || 'none';
+      if (currentStatus === 'none') {
+        showToast(`Perkalian ${table} untuk ${student.name} memang sudah belum dikuasai.`, 'info');
+        return;
+      }
+
+      const ok = confirm(`Reset progres ${student.name} untuk perkalian ${table}?\n\nCheckpoint ×${table} akan kembali menjadi belum dikuasai. Riwayat setoran tidak dihapus.`);
+      if (!ok) return;
+
+      try {
+        if (!supabaseReady || !sb) {
+          throw new Error('Koneksi Supabase belum tersedia.');
+        }
+
+        // Reset resmi dilakukan di Supabase melalui RPC security-definer.
+        // Ini memastikan guru dapat mengubah progres siswa tanpa memberi
+        // hak UPDATE student_progress kepada seluruh role authenticated.
+        const { data: resetDone, error } = await sb.rpc('reset_student_progress', {
+          p_student_id: student.id,
+          p_table: Number(table)
+        });
+        if (error) throw error;
+        if (!resetDone) throw new Error('Data progres siswa tidak ditemukan.');
+
+        // Setelah Supabase berhasil, baru ubah state lokal/dashboard.
+        student.progress[table] = 'none';
+        saveState();
+        showToast(`Progres ×${table} ${student.name} berhasil di-reset.`, 'info');
+        manageStudentModal(studentId);
+        renderTeacherHome(true);
+      } catch (err) {
+        console.error('RESET STUDENT PROGRESS ERROR:', err);
+        showToast('Gagal mereset progres: ' + (err.message || err), 'error');
+      }
+    }
+
+    async function restoreLoginAfterRefresh() {
+      // Supabase Auth menyimpan session secara persisten. Setelah reload,
+      // variabel JavaScript kembali kosong, jadi identitas guru/siswa harus
+      // dipulihkan dari session Supabase sebelum menampilkan halaman awal.
+      if (!supabaseReady || !sb) {
+        renderHome();
+        return;
+      }
+
+      try {
+        const { data: sessionData, error: sessionError } = await sb.auth.getSession();
+        if (sessionError) throw sessionError;
+
+        const user = sessionData?.session?.user;
+        if (!user) {
+          renderHome();
+          return;
+        }
+
+        // Prioritas pertama: cek apakah session ini milik guru.
+        const { data: teacher, error: teacherError } = await sb
+          .from('teachers')
+          .select('id,name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (teacherError) throw teacherError;
+
+        if (teacher) {
+          currentTeacher = teacher;
+          await renderTeacherHome();
+          startTeacherRealtime();
+          return;
+        }
+
+        // Jika bukan guru, coba pulihkan sebagai siswa.
+        const { data: student, error: studentError } = await sb
+          .from('students')
+          .select('*')
+          .eq('auth_user_id', user.id)
+          .maybeSingle();
+
+        if (studentError) throw studentError;
+
+        if (student) {
+          const { data: progressRows, error: progressError } = await sb
+            .from('student_progress')
+            .select('multiplication_table,status')
+            .eq('student_id', student.id);
+          if (progressError) throw progressError;
+
+          const progress = emptyProgress();
+          (progressRows || []).forEach(row => {
+            progress[row.multiplication_table] = row.status;
+          });
+
+          currentStudent = {
+            ...student,
+            progress,
+            history: []
+          };
+          renderStudentHome();
+          return;
+        }
+
+        // Session valid tetapi tidak terhubung ke profil guru/siswa.
+        renderHome();
+      } catch (err) {
+        console.error('RESTORE SESSION ERROR:', err);
+        // Jangan signOut otomatis hanya karena proses pemulihan gagal.
+        // Session Supabase tetap dipertahankan dan pengguna dapat mencoba lagi.
+        renderHome();
+        showToast('Session tersimpan, tetapi profil belum dapat dipulihkan. Coba buka menu login lagi.', 'error');
+      }
+    }
+
+    if (supabaseReady && sb) {
+      sb.auth.onAuthStateChange((event, session) => {
+        if (!session) {
+          stopTeacherRealtime();
+          currentTeacher = null;
+          currentStudent = null;
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      restoreLoginAfterRefresh();
+    });
+  </script>
+</body>
+</html>
