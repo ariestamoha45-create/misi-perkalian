@@ -511,6 +511,20 @@
         }, payload => {
           refreshTeacherDashboardRealtime(`submission_results ${payload.eventType}`);
         })
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'practice_results'
+        }, payload => {
+          refreshTeacherDashboardRealtime(`practice_results ${payload.eventType}`);
+        })
+        // Fallback realtime khusus latihan. Broadcast tidak bergantung pada
+        // konfigurasi Postgres publication, sehingga dashboard tetap bisa
+        // merespons segera setelah siswa selesai latihan.
+        .on('broadcast', { event: 'practice_completed' }, payload => {
+          console.log('[Misi Perkalian] Broadcast latihan diterima:', payload);
+          refreshTeacherDashboardRealtime('practice_completed broadcast');
+        })
         .subscribe(status => {
           console.log('[Misi Perkalian] Status realtime guru:', status);
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
@@ -1172,6 +1186,53 @@
             </div>
           </section>
 
+          <!-- Tahukah Kamu: konsep perkalian -->
+          <section class="bg-white rounded-[30px] p-5 sm:p-7 border border-amber-100 shadow-sm overflow-hidden relative">
+            <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-amber-100/60"></div>
+            <div class="relative z-10">
+              <div class="flex items-start justify-between gap-4 mb-5">
+                <div>
+                  <div class="text-xs font-black text-amber-600 tracking-widest">BELAJAR DULU, BARU MENGHAFAL</div>
+                  <h2 class="font-baloo text-3xl sm:text-4xl font-black text-slate-900">💡 Tahukah Kamu?</h2>
+                  <p class="text-slate-500 text-sm font-bold mt-1">Perkalian adalah penjumlahan berulang.</p>
+                </div>
+                <div class="hidden sm:flex w-12 h-12 rounded-2xl bg-amber-100 items-center justify-center text-2xl">🍩</div>
+              </div>
+
+              <div class="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
+                <div>
+                  <p class="text-slate-700 font-extrabold text-base sm:text-lg mb-4">
+                    Bayangkan ada <span class="text-amber-600">3 piring</span>. Setiap piring berisi <span class="text-teal-600">5 donat</span>.
+                  </p>
+
+                  <div class="grid grid-cols-3 gap-3 sm:gap-4 max-w-xl">
+                    ${[1,2,3].map((plate) => `
+                      <div class="rounded-3xl bg-amber-50 border-2 border-amber-100 p-3 sm:p-4 text-center">
+                        <div class="text-xs font-black text-amber-700 mb-2">PIRING ${plate}</div>
+                        <div class="mx-auto w-full aspect-square max-w-[130px] rounded-full bg-white border-4 border-amber-200 shadow-inner flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 p-3">
+                          ${Array.from({length:5}, (_,i) => `<span class="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-orange-300 border-2 border-orange-400 shadow-sm flex items-center justify-center text-[9px] sm:text-xs">🍩</span>`).join('')}
+                        </div>
+                        <div class="mt-2 text-sm font-black text-slate-700">5 donat</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <div class="rounded-3xl bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-100 p-5 sm:p-6 text-center min-w-[220px]">
+                  <div class="text-xs font-black text-teal-700 tracking-widest mb-3">LIHAT POLANYA</div>
+                  <div class="font-baloo text-2xl sm:text-3xl font-black text-slate-800">5 + 5 + 5 = 15</div>
+                  <div class="my-3 h-px bg-teal-200"></div>
+                  <div class="font-baloo text-4xl sm:text-5xl font-black text-teal-600">3 × 5 = 15</div>
+                  <p class="text-xs text-slate-500 font-bold mt-3">3 kelompok, masing-masing berisi 5.</p>
+                </div>
+              </div>
+
+              <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm font-bold text-amber-900">
+                <span class="font-black">Ingat:</span> angka pertama menunjukkan <strong>jumlah kelompok</strong>, angka kedua menunjukkan <strong>isi setiap kelompok</strong>.
+              </div>
+            </div>
+          </section>
+
           <section class="game-section rounded-[30px] p-5 sm:p-7">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
               <div><div class="text-xs font-black text-indigo-500 tracking-widest">WORLD MAP</div><h2 class="section-title text-3xl sm:text-4xl">Peta Misi Perkalian</h2><p class="text-slate-500 text-sm font-bold">Pilih dunia yang ingin kamu jelajahi.</p></div>
@@ -1208,6 +1269,26 @@
             <button onclick="renderStudentHistory()" class="game-card game-btn rounded-[28px] p-5 bg-gradient-to-br from-violet-500 to-indigo-600 text-white text-left relative overflow-hidden">
               <div class="relative z-10"><div class="text-4xl mb-3 bob" style="animation-delay:.8s">📜</div><div class="font-baloo text-2xl font-black">Riwayat Misi</div><div class="text-xs font-bold text-white/80 mt-1">Lihat perjalanan dan skor yang sudah kamu raih.</div></div><div class="absolute -right-3 -bottom-6 text-8xl opacity-20">📈</div>
             </button>
+          </section>
+
+          <!-- Tentang Misi Perkalian -->
+          <section class="game-section rounded-[30px] p-5 sm:p-7">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl shrink-0">ℹ️</div>
+              <div class="min-w-0">
+                <div class="text-xs font-black text-indigo-500 tracking-widest">TENTANG APLIKASI</div>
+                <h2 class="section-title text-2xl sm:text-3xl">Tentang Misi Perkalian</h2>
+                <div class="mt-3 space-y-3 text-sm sm:text-base text-slate-600 font-semibold leading-relaxed">
+                  <p><strong class="text-slate-800">Misi Perkalian</strong> merupakan media pembelajaran digital yang dikembangkan untuk membantu siswa sekolah dasar memahami dan melatih keterampilan perkalian melalui aktivitas yang interaktif dan bertahap.</p>
+                  <p>Aplikasi ini dikembangkan berdasarkan kebutuhan pembelajaran di kelas, khususnya untuk membantu siswa yang masih mengalami kesulitan dalam memahami dan mengingat fakta perkalian.</p>
+                  <p class="text-slate-500 text-sm">Dalam proses perancangan, pemrograman, dan pengembangan fitur, aplikasi ini memanfaatkan <strong class="text-slate-700">teknologi AI sebagai alat bantu</strong>.</p>
+                </div>
+                <div class="mt-5 pt-4 border-t border-slate-100 text-sm">
+                  <span class="font-black text-slate-500">Pengembang:</span>
+                  <span class="font-black text-slate-800">Ariesta Meylinda Moha, S.Pd.</span>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       `;
@@ -1400,7 +1481,8 @@
         index: 0,
         score: 0,
         locked: false,
-        userAnswerInput: ''
+        userAnswerInput: '',
+        startedAt: Date.now()
       };
       renderActiveQuiz();
     }
@@ -1611,7 +1693,8 @@
         selectedQuestion: null,
         selectedAnswer: null,
         score: 0,
-        locked: false
+        locked: false,
+        startedAt: Date.now()
       };
       renderMatchingGame();
     }
@@ -1723,7 +1806,8 @@
 
     async function finishMatchingGame() {
       const total = quiz.pairs.length;
-      await savePracticeResultToSupabase('matching', quiz.n, quiz.score, total);
+      const durationSeconds = getPracticeDurationSeconds(quiz.startedAt);
+      await savePracticeResultToSupabase('matching', quiz.n, quiz.score, total, durationSeconds);
       sounds.playFanfare();
       launchConfetti();
       const html = `
@@ -1749,7 +1833,8 @@
         n: table,
         qs: generateQuestions(table, 10),
         index: 0,
-        flipped: false
+        flipped: false,
+        startedAt: Date.now()
       };
       renderFlashcardView();
     }
@@ -1815,13 +1900,15 @@
       renderFlashcardView();
     }
 
-    function nextFlashcard() {
+    async function nextFlashcard() {
       sounds.playPop();
       quiz.flipped = false;
       if (quiz.index < quiz.qs.length - 1) {
         quiz.index++;
         renderFlashcardView();
       } else {
+        const durationSeconds = getPracticeDurationSeconds(quiz.startedAt);
+        await savePracticeResultToSupabase('flashcard', quiz.n, 0, quiz.qs.length, durationSeconds);
         renderStudentPractice();
         showToast('Selesai mengulas seluruh kartu hafalan! 🎉', 'success');
       }
@@ -1836,7 +1923,19 @@
       }
     }
 
-    async function savePracticeResultToSupabase(gameType, table, score, totalQuestions) {
+    function getLocalPracticeDateKey(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getPracticeDurationSeconds(startedAt) {
+      if (!startedAt) return 0;
+      return Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+    }
+
+    async function savePracticeResultToSupabase(gameType, table, score, totalQuestions, durationSeconds = 0) {
       if (!supabaseReady || !sb || !currentStudent?.id) {
         console.warn('Practice result belum disimpan: Supabase/student belum siap.');
         return false;
@@ -1847,7 +1946,9 @@
         game_type: gameType,
         multiplication_table: table,
         score: score,
-        total_questions: totalQuestions
+        total_questions: totalQuestions,
+        duration_seconds: Math.max(0, Math.round(durationSeconds)),
+        practice_date: getLocalPracticeDateKey()
       });
 
       if (error) {
@@ -1856,13 +1957,74 @@
         return false;
       }
 
+      // Kirim sinyal realtime ke dashboard guru setelah data benar-benar
+      // berhasil tersimpan. Ini menjadi fallback bila postgres_changes
+      // belum aktif untuk tabel practice_results.
+      try {
+        const practiceChannel = sb.channel('teacher-dashboard-realtime');
+        await new Promise((resolve, reject) => {
+          let settled = false;
+          const finish = fn => value => {
+            if (settled) return;
+            settled = true;
+            fn(value);
+          };
+          practiceChannel.subscribe(finish(resolve));
+          setTimeout(finish(reject), 5000, new Error('Timeout membuka channel broadcast latihan.'));
+        });
+
+        const { error: broadcastError } = await practiceChannel.send({
+          type: 'broadcast',
+          event: 'practice_completed',
+          payload: {
+            student_id: currentStudent.id,
+            practice_date: getLocalPracticeDateKey()
+          }
+        });
+        if (broadcastError) {
+          console.warn('Broadcast latihan gagal:', broadcastError);
+        }
+        try { await sb.removeChannel(practiceChannel); } catch (removeErr) {}
+      } catch (broadcastErr) {
+        console.warn('Sinyal realtime latihan tidak terkirim:', broadcastErr);
+      }
+
       return true;
+    }
+
+    async function loadTodayPracticeMinutes() {
+      if (!supabaseReady || !sb) return {};
+
+      const today = getLocalPracticeDateKey();
+      const { data, error } = await sb
+        .from('practice_results')
+        .select('student_id,duration_seconds,practice_date')
+        .eq('practice_date', today);
+
+      if (error) throw error;
+
+      // Kehadiran latihan ditentukan dari ADA-nya hasil latihan hari ini,
+      // bukan dari durasi. Jadi latihan yang selesai sangat cepat tetap tercatat.
+      const totals = {};
+      (data || []).forEach(row => {
+        const sid = String(row.student_id);
+        if (!totals[sid]) totals[sid] = { durationSeconds: 0, sessions: 0 };
+        totals[sid].durationSeconds += Math.max(0, Number(row.duration_seconds || 0));
+        totals[sid].sessions += 1;
+      });
+      return totals;
+    }
+
+    function formatPracticeMinutes(seconds) {
+      const minutes = Math.round(Math.max(0, Number(seconds || 0)) / 60);
+      return minutes <= 0 ? '<1 menit' : `${minutes} menit`;
     }
 
     async function finishPracticeQuiz() {
       const score = quiz.score;
       const gameType = quiz.type || 'practice';
-      await savePracticeResultToSupabase(gameType, quiz.n, score, quiz.qs.length);
+      const durationSeconds = getPracticeDurationSeconds(quiz.startedAt);
+      await savePracticeResultToSupabase(gameType, quiz.n, score, quiz.qs.length, durationSeconds);
 
       if (score >= 8) {
         sounds.playFanfare();
@@ -1917,6 +2079,7 @@
 
     async function loadActiveSubmissionSession() {
       if (!supabaseReady || !currentStudent) return null;
+
       const { data, error } = await sb
         .from('submission_sessions')
         .select('*')
@@ -1925,6 +2088,19 @@
         .limit(1)
         .maybeSingle();
       if (error) throw error;
+      if (!data) return null;
+
+      // Fitur 3: hanya siswa yang dipilih Guru yang boleh melihat sesi ini.
+      const { data: participant, error: participantError } = await sb
+        .from('submission_session_participants')
+        .select('id')
+        .eq('session_id', data.id)
+        .eq('student_id', currentStudent.id)
+        .maybeSingle();
+
+      if (participantError) throw participantError;
+      if (!participant) return null;
+
       return data;
     }
 
@@ -2014,7 +2190,27 @@
 
       if (!sess || tokenInp !== sess.token) {
         sounds.playWrong();
-        showToast('Token tidak cocok atau sesi telah ditutup!', 'error');
+        showToast('Token tidak cocok, kamu belum dipilih Guru, atau sesi telah ditutup.', 'error');
+        return;
+      }
+
+      // Cek lagi di database sebelum ujian dimulai.
+      const { data: participant, error: participantError } = await sb
+        .from('submission_session_participants')
+        .select('id')
+        .eq('session_id', sess.id)
+        .eq('student_id', currentStudent.id)
+        .maybeSingle();
+
+      if (participantError) {
+        console.error(participantError);
+        showToast('Gagal memeriksa izin setoran.', 'error');
+        return;
+      }
+
+      if (!participant) {
+        sounds.playWrong();
+        showToast('Kamu belum dipilih Guru untuk sesi setoran ini.', 'error');
         return;
       }
 
@@ -2038,29 +2234,152 @@
     }
 
     function generateOfficialQuestions(table) {
-      // V1: 10 soal, satu kali untuk setiap faktor 1–10.
-      // Skor selalu mudah dihitung: 1 jawaban benar = 1 poin.
-      const multipliers = Array.from({ length: 10 }, (_, i) => i + 1)
-        .sort(() => Math.random() - 0.5);
+      // Setoran resmi: 20 soal bervariasi, tetapi tetap fokus pada fakta perkalian.
+      // Komposisi:
+      // - 12 soal perkalian langsung (60%)
+      // - 5 soal faktor yang hilang (25%)
+      // - 3 soal penjumlahan berulang (15%)
+      // Tidak ada pembagian dan tidak ada soal cerita.
+      const questions = [];
+      const signatures = new Set();
 
-      return multipliers.map(multiplier => {
-        const correct = table * multiplier;
+      // Perkalian yang lebih tinggi sedikit lebih menantang, tetapi tetap
+      // dibatasi pada faktor 1–10 agar sesuai dengan materi perkalian.
+      const multiplierPool = () => {
+        const pool = table >= 6
+          ? [3,4,5,6,7,8,9,10,2,1,4,5,6,7,8,9,10]
+          : [1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10];
+        return pool[Math.floor(Math.random() * pool.length)];
+      };
+
+      function addQuestion(question) {
+        const signature = question.signature;
+        if (signatures.has(signature)) return false;
+        signatures.add(signature);
+        questions.push(question);
+        return true;
+      }
+
+      function makeOptions(correct, mode = 'result') {
         const options = new Set([correct]);
 
         while (options.size < 4) {
-          const delta = [-table, table, -2 * table, 2 * table, -1, 1, 2, -2][Math.floor(Math.random() * 8)];
-          const val = correct + delta;
-          if (val > 0) options.add(val);
+          let val;
+          if (mode === 'factor') {
+            const delta = [-2, -1, 1, 2, -3, 3][Math.floor(Math.random() * 6)];
+            val = correct + delta;
+            if (val < 1 || val > 10) continue;
+          } else {
+            const delta = [-table, table, -2 * table, 2 * table, -1, 1, 2, -2][Math.floor(Math.random() * 8)];
+            val = correct + delta;
+            if (val <= 0) continue;
+          }
+          options.add(val);
         }
 
-        return {
-          a: table,
-          b: multiplier,
+        return [...options].sort(() => Math.random() - 0.5);
+      }
+
+      // 12 soal perkalian langsung.
+      // Sebagian dibalik (faktor × tabel) supaya anak mengenali konsep,
+      // bukan hanya menghafal posisi angka.
+      let attempts = 0;
+      while (questions.length < 12 && attempts < 200) {
+        attempts++;
+        const multiplier = multiplierPool();
+        const reversed = questions.filter(q => q.type === 'direct-reverse').length < 4
+          ? (Math.random() < 0.34)
+          : false;
+
+        const a = reversed ? multiplier : table;
+        const b = reversed ? table : multiplier;
+        const correct = table * multiplier;
+
+        addQuestion({
+          type: reversed ? 'direct-reverse' : 'direct',
+          a,
+          b,
           correct,
           correctMultiplier: multiplier,
-          options: [...options].sort(() => Math.random() - 0.5)
-        };
-      });
+          options: makeOptions(correct),
+          prompt: `${a} × ${b} = ?`,
+          signature: `direct:${a}x${b}`
+        });
+      }
+
+      // 5 soal faktor yang hilang.
+      attempts = 0;
+      while (questions.filter(q => q.type === 'missing').length < 5 && attempts < 200) {
+        attempts++;
+        const multiplier = multiplierPool();
+        const correct = table * multiplier;
+        const leftBlank = Math.random() < 0.5;
+
+        const prompt = leftBlank
+          ? `□ × ${table} = ${correct}`
+          : `${table} × □ = ${correct}`;
+
+        addQuestion({
+          type: 'missing',
+          a: leftBlank ? multiplier : table,
+          b: leftBlank ? table : multiplier,
+          correct: multiplier,
+          correctMultiplier: multiplier,
+          options: makeOptions(multiplier, 'factor'),
+          prompt,
+          signature: `missing:${leftBlank ? 'left' : 'right'}:${table}:${multiplier}`
+        });
+      }
+
+      // 3 soal penjumlahan berulang.
+      // Jumlah pengulangan dibatasi agar tetap ringan untuk siswa yang masih kesulitan.
+      attempts = 0;
+      while (questions.filter(q => q.type === 'repeated-addition').length < 3 && attempts < 200) {
+        attempts++;
+        const maxTerms = table >= 6 ? 5 : 7;
+        const terms = Math.floor(Math.random() * (maxTerms - 2)) + 3;
+        const correct = table * terms;
+        const expression = Array(terms).fill(table).join(' + ');
+
+        addQuestion({
+          type: 'repeated-addition',
+          a: table,
+          b: terms,
+          correct,
+          correctMultiplier: terms,
+          options: makeOptions(correct),
+          prompt: `${expression} = ?`,
+          signature: `addition:${table}:${terms}`
+        });
+      }
+
+      // Pengaman: jika variasi acak menghasilkan kurang dari 20 soal,
+      // isi dengan perkalian langsung yang belum pernah dipakai.
+      attempts = 0;
+      while (questions.length < 20 && attempts < 500) {
+        attempts++;
+        const multiplier = ((attempts - 1) % 10) + 1;
+        const correct = table * multiplier;
+        const reversed = attempts % 2 === 0;
+        const a = reversed ? multiplier : table;
+        const b = reversed ? table : multiplier;
+
+        addQuestion({
+          type: reversed ? 'direct-reverse' : 'direct',
+          a,
+          b,
+          correct,
+          correctMultiplier: multiplier,
+          options: makeOptions(correct),
+          prompt: `${a} × ${b} = ?`,
+          signature: `direct:${a}x${b}`
+        });
+      }
+
+      // Acak urutan agar pola komposisi tidak selalu sama.
+      return questions
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 20);
     }
 
     function startOfficialQuiz(session) {
@@ -2103,8 +2422,8 @@
               UJIAN SETORAN RESMI
             </span>
 
-            <div class="font-baloo text-6xl font-extrabold text-slate-900 my-2">
-              ${q.a} × ${q.b} = ?
+            <div class="font-baloo text-5xl sm:text-6xl font-extrabold text-slate-900 my-2 leading-tight">
+              ${q.prompt || `${q.a} × ${q.b} = ?`}
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -2620,6 +2939,15 @@
         state.session = null;
       }
 
+      let todayPracticeByStudent = {};
+      let todayPracticeError = null;
+      try {
+        todayPracticeByStudent = await loadTodayPracticeMinutes();
+      } catch (err) {
+        todayPracticeError = err;
+        console.error('Gagal memuat latihan hari ini:', err);
+      }
+
       const totalStudents = state.students.length;
       const tables = [2,3,4,5,6,7,8,9];
 
@@ -2779,6 +3107,41 @@
             </section>
           `}
 
+          <!-- Latihan Hari Ini -->
+          <section class="mission-panel rounded-[28px] p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+              <div>
+                <div class="text-[10px] font-black tracking-[.18em] text-teal-600 uppercase">AKTIVITAS HARI INI</div>
+                <h2 class="font-baloo text-3xl font-black text-slate-800 leading-none mt-1">Latihan Hari Ini</h2>
+                <p class="text-xs text-slate-500 font-bold mt-2">${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</p>
+              </div>
+              <div class="text-xs font-black text-slate-500">Status otomatis berganti setiap hari</div>
+            </div>
+
+            ${todayPracticeError ? `
+              <div class="p-4 rounded-2xl bg-amber-50 border-2 border-amber-100 text-amber-800 text-xs font-bold">
+                Data latihan hari ini belum dapat dibaca. Pastikan kolom pelacakan latihan sudah ditambahkan di Supabase.
+              </div>
+            ` : `
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="rounded-2xl bg-emerald-50 border-2 border-emerald-100 p-4 lg:col-span-2">
+                  <div class="font-black text-emerald-800 mb-3">✓ Sudah latihan</div>
+                  <div class="space-y-2">
+                    ${state.students.filter(s => todayPracticeByStudent[String(s.id)]).map(s => {
+                      const activity = todayPracticeByStudent[String(s.id)];
+                      return `
+                        <div class="flex items-center justify-between gap-3 bg-white/80 rounded-xl px-3 py-2.5 border border-emerald-100">
+                          <span class="font-black text-sm text-slate-800">${s.avatar || '👧'} ${esc(s.name)}</span>
+                          <span class="text-xs font-black text-emerald-700">${formatPracticeMinutes(activity.durationSeconds)}</span>
+                        </div>
+                      `;
+                    }).join('') || '<div class="text-xs font-bold text-slate-400">Belum ada siswa yang latihan hari ini.</div>'}
+                  </div>
+                </div>
+              </div>
+            `}
+          </section>
+
           <!-- Rocket Journey -->
           <section class="mission-panel rounded-[30px] p-4 sm:p-6">
             <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-5">
@@ -2862,6 +3225,8 @@
 
     function renderTeacherActiveSession() {
       const sess = state.session;
+      const participantIds = sess.participants || [];
+      const participants = state.students.filter(s => participantIds.includes(String(s.id)));
       const count = sess.results?.length || 0;
 
       return `
@@ -2872,7 +3237,7 @@
                 SESI SETORAN BERLANGSUNG
               </span>
               <h2 class="font-baloo text-3xl font-extrabold mt-1">Perkalian ${sess.table}</h2>
-              <p class="text-xs text-slate-300 font-semibold">Bagi Token ini kepada siswa di kelas untuk ujian</p>
+              <p class="text-xs text-slate-300 font-semibold">Hanya siswa yang dipilih yang dapat mengikuti sesi ini.</p>
             </div>
 
             <div class="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 text-center">
@@ -2886,21 +3251,27 @@
           </div>
 
           <div class="pt-4 border-t border-slate-800">
-            <div class="text-xs font-extrabold text-slate-300 mb-2">
-              Siswa Sudah Setor (${count}/${state.students.length}):
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div class="text-xs font-extrabold text-slate-300">
+                Peserta Setoran: ${participants.length}/${state.students.length}
+              </div>
+              <div class="text-[10px] font-bold text-slate-400">
+                Sudah setor: ${count}/${participants.length}
+              </div>
             </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold">
-              ${state.students.map(s => {
-                const res = sess.results?.find(r => r.studentId === s.id);
+              ${participants.map(s => {
+                const res = sess.results?.find(r => String(r.studentId) === String(s.id));
                 return `
-                  <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700 flex items-center justify-between">
+                  <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700 flex items-center justify-between gap-3">
                     <span>${s.avatar || '👧'} ${esc(s.name)}</span>
-                    <span>
-                      ${res ? `<strong class="${res.passed ? 'text-emerald-400' : 'text-amber-300'}">${res.passed ? '✓ Sudah Setor • Lulus' : '✓ Sudah Setor • Belum Lulus'} (${res.score}/10)</strong>` : '<span class="text-slate-500">Belum Setor</span>'}
+                    <span class="text-right">
+                      ${res ? `<strong class="${res.passed ? 'text-emerald-400' : 'text-amber-300'}">${res.passed ? '✓ Lulus' : '✓ Belum Lulus'} (${res.score}/20)</strong>` : '<span class="text-slate-500">Belum Setor</span>'}
                     </span>
                   </div>
                 `;
-              }).join('')}
+              }).join('') || '<div class="text-xs text-slate-500 font-bold">Belum ada peserta.</div>'}
             </div>
           </div>
         </div>
@@ -2909,10 +3280,26 @@
 
     function openCreateSessionModal() {
       sounds.playPop();
+
+      const studentOptions = state.students.map((s, index) => `
+        <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 cursor-pointer transition-colors">
+          <input
+            type="checkbox"
+            class="session-student-checkbox w-5 h-5 accent-indigo-600"
+            value="${esc(s.id)}"
+            checked
+          >
+          <span class="text-xl">${s.avatar || '👧'}</span>
+          <span class="font-black text-sm text-slate-800 flex-1">${esc(s.name)}</span>
+        </label>
+      `).join('');
+
       const html = `
-        <div class="space-y-4">
-          <h2 class="font-baloo text-2xl font-extrabold text-slate-900">Buka Sesi Setoran Baru</h2>
-          <p class="text-slate-500 text-xs font-bold">Pilih angka perkalian yang akan diujikan kepada siswa.</p>
+        <div class="space-y-5 max-h-[85vh] overflow-y-auto pr-1">
+          <div>
+            <h2 class="font-baloo text-2xl font-extrabold text-slate-900">Buka Sesi Setoran Baru</h2>
+            <p class="text-slate-500 text-xs font-bold mt-1">Tentukan siswa yang sudah boleh mengikuti setoran resmi.</p>
+          </div>
 
           <div>
             <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">TARGET PERKALIAN</label>
@@ -2922,16 +3309,32 @@
           </div>
 
           <div>
-            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">SKOR MINIMAL LULUS (DARI 10 SOAL)</label>
+            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">SKOR MINIMAL LULUS (DARI 20 SOAL)</label>
             <select id="sessionPassSelect" class="w-full px-4 py-3 rounded-2xl border border-slate-200 font-extrabold text-slate-800 bg-slate-50">
-              <option value="7">7 / 10</option>
-              <option value="8" selected>8 / 10 (Direkomendasikan)</option>
-              <option value="9">9 / 10</option>
-              <option value="10">10 / 10 (Sempurna)</option>
+              <option value="14">14 / 20</option>
+              <option value="16" selected>16 / 20 (Direkomendasikan)</option>
+              <option value="18">18 / 20</option>
+              <option value="20">20 / 20 (Sempurna)</option>
             </select>
           </div>
 
-          <div class="flex items-center gap-3 pt-2">
+          <div class="rounded-2xl bg-indigo-50 border-2 border-indigo-100 p-4">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <div class="text-xs font-black text-indigo-700 uppercase tracking-wider">PESERTA SETORAN</div>
+                <div class="text-[11px] text-indigo-500 font-bold mt-0.5">Centang siswa yang boleh ikut sesi ini.</div>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" onclick="setAllSessionStudents(true)" class="px-2.5 py-1.5 rounded-xl bg-white text-indigo-700 border border-indigo-100 text-[10px] font-black">Semua</button>
+                <button type="button" onclick="setAllSessionStudents(false)" class="px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 text-[10px] font-black">Kosongkan</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${studentOptions}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
             <button onclick="confirmCreateSession()" class="btn-bounce flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md">
               Buat Sesi & Generate Token
             </button>
@@ -2942,6 +3345,12 @@
         </div>
       `;
       showModal(html);
+    }
+
+    function setAllSessionStudents(checked) {
+      document.querySelectorAll('.session-student-checkbox').forEach(cb => {
+        cb.checked = checked;
+      });
     }
 
     async function loadActiveTeacherSession() {
@@ -2962,11 +3371,18 @@
         .eq('session_id', data.id);
       if (resultError) throw resultError;
 
+      const { data: participants, error: participantError } = await sb
+        .from('submission_session_participants')
+        .select('student_id')
+        .eq('session_id', data.id);
+      if (participantError) throw participantError;
+
       return {
         id: data.id,
         table: data.multiplication_table,
         pass: data.pass_score,
         token: data.token,
+        participants: (participants || []).map(p => p.student_id),
         results: (results || []).map(r => ({
           studentId: r.student_id,
           score: r.score,
@@ -2979,6 +3395,14 @@
     async function confirmCreateSession() {
       const table = parseInt(document.getElementById('sessionTableSelect').value, 10);
       const pass = parseInt(document.getElementById('sessionPassSelect').value, 10);
+      const selectedStudentIds = [...document.querySelectorAll('.session-student-checkbox:checked')]
+        .map(cb => cb.value)
+        .filter(Boolean);
+
+      if (!selectedStudentIds.length) {
+        showToast('Pilih minimal satu siswa untuk mengikuti setoran.', 'error');
+        return;
+      }
 
       if (!supabaseReady || !sb) {
         showToast('Supabase belum siap.', 'error');
@@ -3007,20 +3431,37 @@
           .single();
         if (error) throw error;
 
+        // Simpan daftar peserta ke database agar izin tidak hanya tersimpan di browser Guru.
+        const participantRows = selectedStudentIds.map(studentId => ({
+          session_id: data.id,
+          student_id: studentId
+        }));
+
+        const { error: participantError } = await sb
+          .from('submission_session_participants')
+          .insert(participantRows);
+
+        if (participantError) {
+          // Jangan meninggalkan sesi aktif tanpa daftar peserta.
+          await sb.from('submission_sessions').update({ is_active: false }).eq('id', data.id);
+          throw participantError;
+        }
+
         state.session = {
           id: data.id,
           table: data.multiplication_table,
           pass: data.pass_score,
           token: data.token,
+          participants: selectedStudentIds,
           results: [],
           created: data.created_at
         };
 
         closeModal();
-        showToast(`Sesi Setoran Perkalian ${table} dibuka! Token: ${token}`, 'success');
+        showToast(`Sesi Setoran ×${table} dibuka untuk ${selectedStudentIds.length} siswa. Token: ${token}`, 'success');
         renderTeacherHome();
       } catch (err) {
-        console.error(err);
+        console.error('CREATE SESSION ERROR:', err);
         showToast('Sesi gagal dibuat: ' + (err.message || err), 'error');
       }
     }
