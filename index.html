@@ -475,6 +475,10 @@
     let currentTable = 4;
     let quiz = null;
 
+    // Jumlah soal SETORAN RESMI. Semua tampilan, generator, dan penyimpanan
+    // hasil setoran harus mengikuti angka ini agar tidak terjadi 10 soal vs 20 soal.
+    const OFFICIAL_QUIZ_TOTAL = 20;
+
     // Dashboard guru terhubung realtime ke Supabase. Tidak memakai polling/refresh berkala.
     let teacherRealtimeChannel = null;
     let teacherRealtimeRefreshBusy = false;
@@ -2136,11 +2140,11 @@
             <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-xl space-y-4">
               <div class="flex items-center justify-between">
                 <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-black">SESI SETORAN AKTIF</span>
-                <span class="text-xs font-bold text-amber-100">Minimal ${session.pass}/10 untuk Lulus</span>
+                <span class="text-xs font-bold text-amber-100">Minimal ${session.pass}/${OFFICIAL_QUIZ_TOTAL} untuk Lulus</span>
               </div>
               <div>
                 <h2 class="font-baloo text-3xl font-extrabold">Ujian Perkalian ${session.table}</h2>
-                <p class="text-amber-100 text-xs font-semibold mt-1">Dibuat oleh Guru • 10 Soal Acak</p>
+                <p class="text-amber-100 text-xs font-semibold mt-1">Dibuat oleh Guru • ${OFFICIAL_QUIZ_TOTAL} Soal Acak</p>
               </div>
             </div>
 
@@ -2234,152 +2238,48 @@
     }
 
     function generateOfficialQuestions(table) {
-      // Setoran resmi: 20 soal bervariasi, tetapi tetap fokus pada fakta perkalian.
-      // Komposisi:
-      // - 12 soal perkalian langsung (60%)
-      // - 5 soal faktor yang hilang (25%)
-      // - 3 soal penjumlahan berulang (15%)
-      // Tidak ada pembagian dan tidak ada soal cerita.
+      // SETORAN RESMI: tepat 20 soal murni perkalian.
+      // Setiap soal berupa fakta perkalian table × faktor 1–10,
+      // dengan posisi faktor boleh dibalik. Soal boleh muncul kembali
+      // karena targetnya adalah 20 soal acak, bukan 20 pasangan unik.
       const questions = [];
-      const signatures = new Set();
 
-      // Perkalian yang lebih tinggi sedikit lebih menantang, tetapi tetap
-      // dibatasi pada faktor 1–10 agar sesuai dengan materi perkalian.
-      const multiplierPool = () => {
-        const pool = table >= 6
-          ? [3,4,5,6,7,8,9,10,2,1,4,5,6,7,8,9,10]
-          : [1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10];
-        return pool[Math.floor(Math.random() * pool.length)];
-      };
-
-      function addQuestion(question) {
-        const signature = question.signature;
-        if (signatures.has(signature)) return false;
-        signatures.add(signature);
-        questions.push(question);
-        return true;
-      }
-
-      function makeOptions(correct, mode = 'result') {
+      function makeQuestion(a, b) {
+        const correct = a * b;
         const options = new Set([correct]);
+        const deltas = [-table, table, -2 * table, 2 * table, -1, 1, -2, 2];
+        let guard = 0;
 
-        while (options.size < 4) {
-          let val;
-          if (mode === 'factor') {
-            const delta = [-2, -1, 1, 2, -3, 3][Math.floor(Math.random() * 6)];
-            val = correct + delta;
-            if (val < 1 || val > 10) continue;
-          } else {
-            const delta = [-table, table, -2 * table, 2 * table, -1, 1, 2, -2][Math.floor(Math.random() * 8)];
-            val = correct + delta;
-            if (val <= 0) continue;
-          }
-          options.add(val);
+        while (options.size < 4 && guard < 100) {
+          guard++;
+          const delta = deltas[Math.floor(Math.random() * deltas.length)];
+          const val = correct + delta;
+          if (val > 0) options.add(val);
         }
 
-        return [...options].sort(() => Math.random() - 0.5);
-      }
-
-      // 12 soal perkalian langsung.
-      // Sebagian dibalik (faktor × tabel) supaya anak mengenali konsep,
-      // bukan hanya menghafal posisi angka.
-      let attempts = 0;
-      while (questions.length < 12 && attempts < 200) {
-        attempts++;
-        const multiplier = multiplierPool();
-        const reversed = questions.filter(q => q.type === 'direct-reverse').length < 4
-          ? (Math.random() < 0.34)
-          : false;
-
-        const a = reversed ? multiplier : table;
-        const b = reversed ? table : multiplier;
-        const correct = table * multiplier;
-
-        addQuestion({
-          type: reversed ? 'direct-reverse' : 'direct',
+        return {
+          type: 'direct',
           a,
           b,
           correct,
-          correctMultiplier: multiplier,
-          options: makeOptions(correct),
+          correctMultiplier: table === a ? b : a,
+          options: [...options].sort(() => Math.random() - 0.5),
           prompt: `${a} × ${b} = ?`,
           signature: `direct:${a}x${b}`
-        });
+        };
       }
 
-      // 5 soal faktor yang hilang.
-      attempts = 0;
-      while (questions.filter(q => q.type === 'missing').length < 5 && attempts < 200) {
-        attempts++;
-        const multiplier = multiplierPool();
-        const correct = table * multiplier;
-        const leftBlank = Math.random() < 0.5;
-
-        const prompt = leftBlank
-          ? `□ × ${table} = ${correct}`
-          : `${table} × □ = ${correct}`;
-
-        addQuestion({
-          type: 'missing',
-          a: leftBlank ? multiplier : table,
-          b: leftBlank ? table : multiplier,
-          correct: multiplier,
-          correctMultiplier: multiplier,
-          options: makeOptions(multiplier, 'factor'),
-          prompt,
-          signature: `missing:${leftBlank ? 'left' : 'right'}:${table}:${multiplier}`
-        });
-      }
-
-      // 3 soal penjumlahan berulang.
-      // Jumlah pengulangan dibatasi agar tetap ringan untuk siswa yang masih kesulitan.
-      attempts = 0;
-      while (questions.filter(q => q.type === 'repeated-addition').length < 3 && attempts < 200) {
-        attempts++;
-        const maxTerms = table >= 6 ? 5 : 7;
-        const terms = Math.floor(Math.random() * (maxTerms - 2)) + 3;
-        const correct = table * terms;
-        const expression = Array(terms).fill(table).join(' + ');
-
-        addQuestion({
-          type: 'repeated-addition',
-          a: table,
-          b: terms,
-          correct,
-          correctMultiplier: terms,
-          options: makeOptions(correct),
-          prompt: `${expression} = ?`,
-          signature: `addition:${table}:${terms}`
-        });
-      }
-
-      // Pengaman: jika variasi acak menghasilkan kurang dari 20 soal,
-      // isi dengan perkalian langsung yang belum pernah dipakai.
-      attempts = 0;
-      while (questions.length < 20 && attempts < 500) {
-        attempts++;
-        const multiplier = ((attempts - 1) % 10) + 1;
-        const correct = table * multiplier;
-        const reversed = attempts % 2 === 0;
+      // Tepat 20 soal. Faktor dipilih acak dari 1–10 dan posisi
+      // perkalian diacak, sehingga tidak ada ketergantungan pada urutan.
+      for (let i = 0; i < OFFICIAL_QUIZ_TOTAL; i++) {
+        const multiplier = Math.floor(Math.random() * 10) + 1;
+        const reversed = Math.random() < 0.35;
         const a = reversed ? multiplier : table;
         const b = reversed ? table : multiplier;
-
-        addQuestion({
-          type: reversed ? 'direct-reverse' : 'direct',
-          a,
-          b,
-          correct,
-          correctMultiplier: multiplier,
-          options: makeOptions(correct),
-          prompt: `${a} × ${b} = ?`,
-          signature: `direct:${a}x${b}`
-        });
+        questions.push(makeQuestion(a, b));
       }
 
-      // Acak urutan agar pola komposisi tidak selalu sama.
-      return questions
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 20);
+      return questions;
     }
 
     function startOfficialQuiz(session) {
@@ -2390,10 +2290,20 @@
         sessionId: session.id,
         pass: session.pass_score,
         qs: generateOfficialQuestions(session.multiplication_table),
+        totalQuestions: OFFICIAL_QUIZ_TOTAL,
+        timeLimit: 7,
         index: 0,
         score: 0,
-        locked: false
+        locked: false,
+        timerId: null,
+        timeLeft: 7
       };
+      if (quiz.qs.length !== OFFICIAL_QUIZ_TOTAL) {
+        console.error('Jumlah soal setoran resmi tidak sesuai:', quiz.qs.length);
+        showToast(`Soal setoran gagal dibuat lengkap (${quiz.qs.length}/${OFFICIAL_QUIZ_TOTAL}). Silakan buka sesi baru.`, 'error');
+        quiz = null;
+        return;
+      }
       renderOfficialQuizView();
     }
 
@@ -2412,7 +2322,11 @@
                 <span class="text-amber-600 font-black">RESMI</span>
               </div>
               <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-amber-500 transition-all duration-300 rounded-full" style="width: ${progressPct}%"></div>
+                <div id="officialTimerBar" class="h-full bg-amber-500 transition-all duration-100 rounded-full" style="width: 100%"></div>
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-[11px] font-black text-slate-400 uppercase">Waktu soal</span>
+                <span id="officialTimerText" class="font-baloo text-xl font-black text-amber-600">7 detik</span>
               </div>
             </div>
           </div>
@@ -2440,14 +2354,58 @@
         </div>
       `;
       document.getElementById('app').innerHTML = studentLayout(html, 'submit');
+      startOfficialTimer();
     }
 
-    function answerOfficial(val) {
+    function clearOfficialTimer() {
+      if (quiz?.timerId) {
+        clearInterval(quiz.timerId);
+        quiz.timerId = null;
+      }
+    }
+
+    function startOfficialTimer() {
+      clearOfficialTimer();
+      if (!quiz || quiz.locked) return;
+      quiz.timeLeft = quiz.timeLimit;
+      updateOfficialTimerUI();
+      quiz.timerId = setInterval(() => {
+        if (!quiz || quiz.locked) return;
+        quiz.timeLeft--;
+        updateOfficialTimerUI();
+        if (quiz.timeLeft <= 0) {
+          clearOfficialTimer();
+          answerOfficial(null, true);
+        }
+      }, 1000);
+    }
+
+    function updateOfficialTimerUI() {
+      const text = document.getElementById('officialTimerText');
+      const bar = document.getElementById('officialTimerBar');
+      if (!text || !bar || !quiz) return;
+      const left = Math.max(0, quiz.timeLeft);
+      text.textContent = `${left} detik`;
+      bar.style.width = `${(left / quiz.timeLimit) * 100}%`;
+      if (left <= 2) {
+        text.className = 'font-baloo text-xl font-black text-rose-600';
+        bar.className = 'h-full bg-rose-500 transition-all duration-100 rounded-full';
+      } else if (left <= 4) {
+        text.className = 'font-baloo text-xl font-black text-amber-600';
+        bar.className = 'h-full bg-orange-500 transition-all duration-100 rounded-full';
+      } else {
+        text.className = 'font-baloo text-xl font-black text-emerald-600';
+        bar.className = 'h-full bg-emerald-500 transition-all duration-100 rounded-full';
+      }
+    }
+
+    function answerOfficial(val, timedOut = false) {
       if (quiz.locked) return;
       quiz.locked = true;
+      clearOfficialTimer();
 
       const q = quiz.qs[quiz.index];
-      const isCorrect = (val === q.correct);
+      const isCorrect = !timedOut && (val === q.correct);
 
       if (isCorrect) {
         quiz.score++;
@@ -2457,11 +2415,13 @@
       }
 
       const feedbackEl = document.getElementById('officialFeedback');
-      feedbackEl.innerHTML = `
-        <div class="p-3 rounded-xl ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} font-black text-sm">
-          ${isCorrect ? '✓ Jawaban Tersimpan' : '✕ Jawaban Tersimpan'}
-        </div>
-      `;
+      if (feedbackEl) {
+        feedbackEl.innerHTML = `
+          <div class="p-3 rounded-xl ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} font-black text-sm">
+            ${timedOut ? '⏱ Waktu habis — dianggap salah' : (isCorrect ? '✓ Jawaban Tersimpan' : '✕ Jawaban Tersimpan')}
+          </div>
+        `;
+      }
 
       setTimeout(() => {
         quiz.index++;
@@ -2471,10 +2431,11 @@
         } else {
           renderOfficialQuizView();
         }
-      }, 500);
+      }, timedOut ? 300 : 500);
     }
 
     async function finishOfficialQuiz() {
+      clearOfficialTimer();
       const sess = { id: quiz.sessionId, table: quiz.n, pass: quiz.pass };
       const score = quiz.score;
       const passed = score >= sess.pass;
